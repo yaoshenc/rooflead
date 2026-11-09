@@ -1,0 +1,20 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1793780133149,
+      "tag": "0000_superb_the_call",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1793781398871,
+      "tag": "0001_massive_forgotten_one",
+      "breakpoints": true
+    }
+  ]
+}
