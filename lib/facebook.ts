@@ -20,7 +20,7 @@ type Env = {
   ROOFLEAD_OWNER_ID?: string;
 };
 type Ctx = { waitUntil(p: Promise<unknown>): void };
-type Message = { from: "customer" | "business"; text: string; at: number; auto?: boolean; error?: string };
+type Message = { from: "customer" | "business"; text: string; at: number; auto?: boolean; error?: string; simulated?: boolean };
 type Conversation = {
   source: "messenger" | "facebook_lead";
   externalId: string;
@@ -36,6 +36,7 @@ type Conversation = {
   receivedAt: number;
   formName?: string;
   adName?: string;
+  simulated?: boolean;
 };
 type FbSettings = { autoReply: boolean; template: string; businessName: string };
 
@@ -144,7 +145,7 @@ async function claimAutoReply(env: Env, owner: string, psid: string) {
   return r.meta.changes > 0;
 }
 
-async function handleMessage(env: Env, owner: string, ev: any) {
+async function handleMessage(env: Env, owner: string, ev: any, sim?: { name?: string }) {
   const psid = String(ev?.sender?.id || "");
   const msg = ev?.message;
   if (!psid || !msg || msg.is_echo || !/^\d{1,30}$/.test(psid)) return;
@@ -152,9 +153,9 @@ async function handleMessage(env: Env, owner: string, ev: any) {
   if (!text) return;
   if (msg.mid && !(await claim(env, owner, "fbmid:" + String(msg.mid).slice(0, 200)))) return; // Meta redelivery
   const found = await loadConversation(env, owner, "messenger", psid);
-  const convo: Conversation = found?.convo || { source: "messenger", externalId: psid, messages: [], receivedAt: Date.now() };
+  const convo: Conversation = found?.convo || { source: "messenger", externalId: psid, messages: [], receivedAt: Date.now(), ...(sim ? { simulated: true, name: sim.name } : {}) };
   convo.messages.push({ from: "customer", text, at: Number(ev.timestamp) || Date.now(), ...(msg.mid ? { mid: String(msg.mid).slice(0, 200) } : {}) } as Message);
-  if (!convo.name) {
+  if (!convo.name && !convo.simulated) {
     try {
       const p = await graph(env, "/" + psid + "?fields=first_name,last_name");
       convo.name = [p.first_name, p.last_name].filter(Boolean).join(" ").slice(0, 120) || undefined;
@@ -168,8 +169,8 @@ async function handleMessage(env: Env, owner: string, ev: any) {
   if (settings.autoReply && (await claimAutoReply(env, owner, psid))) {
     const reply = fill(settings.template, convo, settings);
     try {
-      await sendMessage(env, psid, reply);
-      convo.messages.push({ from: "business", text: reply, at: Date.now(), auto: true });
+      if (!convo.simulated) await sendMessage(env, psid, reply);
+      convo.messages.push({ from: "business", text: reply, at: Date.now(), auto: true, ...(convo.simulated ? { simulated: true } : {}) });
     } catch (e) {
       convo.messages.push({ from: "business", text: reply, at: Date.now(), auto: true, error: e instanceof Error ? e.message : "Not sent" });
     }
@@ -183,12 +184,12 @@ const FIELD_MAP: Record<string, keyof Conversation> = {
   full_name: "name", first_name: "name", email: "email", phone_number: "phone", phone: "phone",
   street_address: "address", address: "address",
 };
-async function handleLeadgen(env: Env, owner: string, value: any) {
+async function handleLeadgen(env: Env, owner: string, value: any, simLead?: any) {
   const leadId = String(value?.leadgen_id || "");
   if (!/^\d{1,30}$/.test(leadId)) return;
   if (await loadConversation(env, owner, "facebook_lead", leadId)) return;
-  const lead = await graph(env, "/" + leadId + "?fields=created_time,field_data,ad_name,form_id");
-  const convo: Conversation = { source: "facebook_lead", externalId: leadId, messages: [], answers: [], receivedAt: Date.parse(lead.created_time) || Date.now(), adName: lead.ad_name ? String(lead.ad_name).slice(0, 120) : undefined };
+  const lead = simLead || (await graph(env, "/" + leadId + "?fields=created_time,field_data,ad_name,form_id"));
+  const convo: Conversation = { source: "facebook_lead", externalId: leadId, messages: [], answers: [], receivedAt: Date.parse(lead.created_time) || Date.now(), adName: lead.ad_name ? String(lead.ad_name).slice(0, 120) : undefined, ...(simLead ? { simulated: true } : {}) };
   const place: Record<string, string> = {};
   for (const f of lead.field_data || []) {
     const name = String(f.name || "").toLowerCase().slice(0, 100), val = (f.values || []).map(String).join(", ").slice(0, 500);
@@ -274,18 +275,43 @@ export async function inboundEndpoint(request: Request, env: Env) {
       return json({ settings: value });
     }
     if (url.pathname === "/api/facebook/reply" && request.method === "POST") {
-      if (!configured(env)) return json({ error: "Facebook is not connected." }, 503);
       const b: any = await request.json();
       const psid = String(b.psid || ""), text = String(b.text || "").trim();
       if (!/^\d{1,30}$/.test(psid) || !text || text.length > 1900) return json({ error: "Write a message of up to 1900 characters." }, 400);
       const found = await loadConversation(env, owner, "messenger", psid);
       if (!found) return json({ error: "Conversation not found." }, 404);
+      if (!found.convo.simulated && !configured(env)) return json({ error: "Facebook is not connected." }, 503);
       const last = [...found.convo.messages].reverse().find((m) => m.from === "customer");
       if (!last || Date.now() - last.at > 24 * 3600 * 1000) return json({ error: "Messenger only allows replies within 24 hours of the customer's last message. Contact them by phone or email instead." }, 409);
-      await sendMessage(env, psid, text);
-      found.convo.messages.push({ from: "business", text, at: Date.now() });
+      if (!found.convo.simulated) await sendMessage(env, psid, text);
+      found.convo.messages.push({ from: "business", text, at: Date.now(), ...(found.convo.simulated ? { simulated: true } : {}) });
       await env.DB.prepare("UPDATE inbound_leads SET payload=?,updated_at=? WHERE id=? AND owner=?").bind(JSON.stringify(found.convo), Date.now(), found.row.id, owner).run();
       return json({ conversation: found.convo });
+    }
+    if (url.pathname === "/api/facebook/simulate" && request.method === "POST") {
+      // Simulation: runs the same lead + auto-reply pipeline as the real webhook,
+      // for the signed-in owner only, without contacting Meta.
+      const b: any = await request.json();
+      const recent: any = await env.DB.prepare("SELECT COUNT(*) AS n FROM inbound_leads WHERE owner=? AND created_at>?").bind(owner, Date.now() - 600000).first();
+      if (Number(recent?.n || 0) >= 30) return json({ error: "Please wait a few minutes before simulating more leads." }, 429);
+      const name = String(b.name || "").trim().slice(0, 120) || "Test Customer";
+      if (b.kind === "message") {
+        const psid = b.psid && /^9\d{14}$/.test(String(b.psid)) ? String(b.psid) : "9" + String(Math.floor(Math.random() * 1e14)).padStart(14, "0");
+        const text = String(b.text || "").trim().slice(0, 2000);
+        if (!text) return json({ error: "Write the customer's message." }, 400);
+        await handleMessage(env, owner, { sender: { id: psid }, timestamp: Date.now(), message: { mid: "sim." + crypto.randomUUID(), text } }, { name });
+        return json({ ok: true, psid });
+      }
+      if (b.kind === "lead") {
+        const leadId = "8" + String(Math.floor(Math.random() * 1e14)).padStart(14, "0");
+        const f = (k: string, v: unknown) => (String(v || "").trim() ? [{ name: k, values: [String(v).trim().slice(0, 300)] }] : []);
+        await handleLeadgen(env, owner, { leadgen_id: leadId }, {
+          created_time: new Date().toISOString(), ad_name: String(b.adName || "Simulated lead ad").slice(0, 120),
+          field_data: [...f("full_name", name), ...f("email", b.email), ...f("phone_number", b.phone), ...f("street_address", b.address), ...f("city", b.suburb), ...f("state", b.state || "NSW"), ...f("post_code", b.postcode), ...f("what_do_you_need_help_with?", b.need)],
+        });
+        return json({ ok: true, leadId });
+      }
+      return json({ error: "Unknown simulation." }, 400);
     }
     return json({ error: "Not found." }, 404);
   } catch (e) {

@@ -51,4 +51,6 @@ The script writes `dist/server/wrangler.deploy.json`, creates the D1 database on
 - `OPENAI_API_KEY` — enables AI research and roof outlines (paid per use).
 - `FB_APP_SECRET`, `FB_VERIFY_TOKEN`, `FB_PAGE_ACCESS_TOKEN` — Facebook Lead Ads and Messenger leads with auto-replies. See [FACEBOOK.md](FACEBOOK.md).
 
+Migration `0003_job_photos.sql` adds `job_photos` (JPEG bytes + thumbnails, owner-scoped) and `upload_links` (customer upload tokens, stored as SHA-256 hashes). Customer upload pages (`/upload/<token>`) are public by design; they can only add up to 20 photos to one job and expire after 14 days. On the owner-private Sites deployment, customers cannot reach these links.
+
 Migration `0002_facebook_inbound.sql` adds `inbound_leads` and `workspace_settings` (append-only; applied by the deploy script).

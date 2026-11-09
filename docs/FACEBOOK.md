@@ -7,7 +7,11 @@ RoofLead receives two kinds of Facebook enquiries through one webhook:
 
 Leads are held in D1 (`inbound_leads`) until a signed-in browser imports them (on load, when the tab becomes visible, and every minute). Auto-replies are sent by the server, so they work while nobody has RoofLead open. The reply template lives in D1 (`workspace_settings`) and is edited in **Settings → Facebook & Messenger leads**.
 
-## Setup (once)
+## Simulation mode (default)
+
+Until the three Facebook secrets are set, **Settings → Facebook & Messenger leads** runs in simulation mode. *Simulate an enquiry* sends a test Messenger message or lead-ad form through the same server pipeline as the real webhook (lead creation, address detection, auto-reply rules, duplicate protection). Nothing is sent to Meta. Simulated conversations and replies are marked "simulated, not sent". Simulations are limited to 30 per 10 minutes.
+
+## Setup (once, when going live)
 
 You need admin access to the Facebook Page and a Meta developer account.
 
