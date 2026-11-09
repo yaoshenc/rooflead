@@ -235,3 +235,43 @@ table td{font-size:14px}
 .fu-history ul{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:8px}
 .fu-history li{display:flex;justify-content:space-between;gap:12px;font-size:12px}
 .fu-history li b{font-weight:500;color:var(--ink-2)}.fu-history li small{color:var(--muted-2);white-space:nowrap}
+
+/* ---- Customer hub (beside the AI property report) ---- */
+.hub{padding:0;overflow:hidden}
+.hub-head{display:flex;align-items:center;gap:12px;padding:18px 20px 10px}
+.hub-avatar{width:40px;height:40px;border-radius:50%;background:var(--accent-soft);color:var(--brand);display:grid;place-items:center;font-weight:700;font-size:14px;flex-shrink:0}
+.hub-who{flex:1;min-width:0}.hub-who h2{margin:0;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.hub-who small{color:var(--muted)}
+.hub-contacts{display:flex;flex-wrap:wrap;gap:6px;padding:0 20px 14px}
+.hub-contact{display:inline-flex;align-items:center;gap:6px;max-width:100%;padding:6px 10px;border-radius:999px;border:1px solid var(--line);font-size:12px;font-weight:600;color:var(--ink-2);background:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+a.hub-contact:hover{border-color:var(--line-2);background:#f8fafc;color:var(--ink)}
+.hub-contact span{color:var(--muted)}
+.hub-missing{font-size:12px;color:var(--muted)}
+.hub-tabs{display:flex;gap:2px;padding:0 14px;border-bottom:1px solid var(--line)}
+.hub-tabs button{display:inline-flex;align-items:center;gap:6px;padding:11px 8px;margin-bottom:-1px;font-size:13px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent}
+.hub-tabs button:hover{color:var(--ink)}
+.hub-tabs button.active{color:var(--ink);border-bottom-color:var(--brand)}
+.hub-tabs em{font-style:normal;font-size:11px;padding:1px 7px;border-radius:999px;background:#eef1f5;color:var(--ink-2)}
+.hub-tabs em.warn{background:var(--warn-soft);color:var(--warn)}.hub-tabs em.ok{background:var(--ok-soft);color:var(--ok)}
+.hub-panel{padding:16px 20px 20px}.hub-panel[hidden]{display:none}
+.hub-timeline{list-style:none;margin:0 0 14px;padding:0 2px 0 0;display:flex;flex-direction:column;gap:12px;max-height:min(52vh,460px);overflow:auto;scrollbar-width:thin}
+.hub-msg{display:flex;flex-direction:column;max-width:88%}
+.hub-msg.in{align-self:flex-start}.hub-msg.out{align-self:flex-end;align-items:flex-end}
+.hub-bubble{padding:10px 12px;border-radius:14px;background:#f1f4f8;font-size:13px;line-height:1.5;color:var(--ink)}
+.hub-msg.in .hub-bubble{border-bottom-left-radius:4px}
+.hub-msg.out .hub-bubble{background:var(--accent-soft);border-bottom-right-radius:4px}
+.hub-bubble p{margin:0;white-space:pre-wrap;font-size:13px!important;color:var(--ink)!important}
+.hub-label{display:block;font-size:11px;font-weight:700;color:var(--muted);margin-bottom:4px}
+.hub-bubble dl{margin:4px 0 0;display:grid;gap:6px}
+.hub-bubble dt{font-size:11px;color:var(--muted)}.hub-bubble dd{margin:0;font-weight:600}
+.hub-msg small{margin-top:4px;font-size:11px;color:var(--muted-2)}
+.hub-event{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:baseline;padding:2px 4px;font-size:12px;color:var(--muted)}
+.hub-event span{color:var(--ok);font-weight:700}
+.hub-event b{font-weight:600;color:var(--ink-2)}.hub-event small{display:block;color:var(--muted-2)}
+.hub-event time{font-size:11px;color:var(--muted-2);white-space:nowrap}
+.hub-compose .fb-reply{display:flex;gap:8px;align-items:flex-end}
+.hub-compose .fb-reply textarea{flex:1;min-height:44px;max-height:140px;resize:vertical}
+.hub-compose .fb-meta{margin:8px 0 0}
+.in-hub{border:0!important;box-shadow:none!important;padding:0!important;margin:0!important;background:none!important}
+.in-hub>.card-header h2{display:none}.in-hub>.card-header{justify-content:flex-start;margin-bottom:14px}
+.in-hub>h2{display:none}
+@media(min-width:1101px){.detail-grid>div:last-child{overflow:visible;max-height:none}}
