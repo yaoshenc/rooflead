@@ -293,7 +293,7 @@ export async function inboundEndpoint(request: Request, env: Env) {
       // for the signed-in owner only, without contacting Meta.
       const b: any = await request.json();
       const recent: any = await env.DB.prepare("SELECT COUNT(*) AS n FROM inbound_leads WHERE owner=? AND created_at>?").bind(owner, Date.now() - 600000).first();
-      if (Number(recent?.n || 0) >= 30) return json({ error: "Please wait a few minutes before simulating more leads." }, 429);
+      if (Number(recent?.n || 0) >= 30) return json({ error: "Please wait a few minutes before sending more test enquiries." }, 429);
       const name = String(b.name || "").trim().slice(0, 120) || "Test Customer";
       if (b.kind === "message") {
         const psid = b.psid && /^9\d{14}$/.test(String(b.psid)) ? String(b.psid) : "9" + String(Math.floor(Math.random() * 1e14)).padStart(14, "0");
