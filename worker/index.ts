@@ -4,9 +4,17 @@ import { researchEndpoint } from "../lib/research";
 import handler from "vinext/server/fetch-handler";
 import { runWithConnectorBinding } from "../lib/connector-context";
 import type { ConnectorBinding } from "../lib/connector-contract.mjs";
+import { gateIndependent, isIndependent } from "./independent-auth";
 
 const worker = {
-  fetch(request: Request, env: Cloudflare.Env, ctx: ExecutionContext<{ CONNECTORS?: ConnectorBinding }>) {
+  async fetch(request: Request, env: Cloudflare.Env, ctx: ExecutionContext<{ CONNECTORS?: ConnectorBinding }>) {
+    // Independent hosting has no upstream Sites login: this gate is the trusted
+    // boundary. Sites deployments do not set ROOFLEAD_HOSTING and are unchanged.
+    if (isIndependent(env)) {
+      const gated = await gateIndependent(request, env);
+      if (gated instanceof Response) return gated;
+      request = gated;
+    }
     if (new URL(request.url).pathname==="/api/imagery") return imageryEndpoint(request, env as any);
     if (new URL(request.url).pathname==="/api/outline") return outlineEndpoint(request, env as any);
     if (new URL(request.url).pathname.startsWith("/api/research")) return researchEndpoint(request, env as any);
