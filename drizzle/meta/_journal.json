@@ -29,6 +29,13 @@
       "when": 1794228373240,
       "tag": "0003_job_photos",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1794231264092,
+      "tag": "0004_info_requests",
+      "breakpoints": true
     }
   ]
 }

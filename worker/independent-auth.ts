@@ -131,7 +131,7 @@ export async function gateIndependent(request: Request, env: IndependentEnv): Pr
   // Facebook's webhook (verified by signature) and customer photo uploads
   // (authorised by link token) are reached without a workspace session.
   // Identity headers are stripped so it can never act as the signed-in owner.
-  if (url.pathname === "/api/facebook/webhook" || url.pathname.startsWith("/upload/") || url.pathname.startsWith("/api/customer-upload/")) {
+  if (url.pathname === "/api/facebook/webhook" || url.pathname.startsWith("/upload/") || url.pathname.startsWith("/api/customer-upload/") || url.pathname.startsWith("/api/customer-request/")) {
     const headers = new Headers();
     for (const [k, v] of request.headers) if (!k.toLowerCase().startsWith("oai-")) headers.set(k, v);
     return new Request(request, { headers });

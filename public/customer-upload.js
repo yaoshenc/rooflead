@@ -12,3 +12,16 @@ form.addEventListener('submit',async e=>{e.preventDefault();const files=[...docu
  status.textContent=ok?`Thank you — ${ok} photo(s) sent to your roofer.${remaining?' You can add more if needed.':''}`:'No photos were sent. Please try again.';
  form.reset();btn.disabled=remaining<=0});
 })();
+
+// Information request answers (quick-tap chips fill the answer box).
+(()=>{
+const form=document.getElementById('customer-answers');if(!form)return;
+const token=location.pathname.split('/').pop(),status=document.getElementById('cu-answer-status');
+form.querySelectorAll('[data-for]').forEach(b=>b.addEventListener('click',()=>{const t=document.getElementById(b.dataset.for);t.value=b.textContent;form.querySelectorAll(`[data-for="${b.dataset.for}"]`).forEach(x=>x.classList.toggle('active',x===b));t.focus()}));
+form.addEventListener('submit',async e=>{e.preventDefault();const btn=form.querySelector('button[type=submit]');const answers={};form.querySelectorAll('textarea').forEach(t=>{if(t.value.trim())answers[t.name]=t.value.trim()});
+ if(!Object.keys(answers).length){status.textContent='Please answer at least one question.';return}
+ btn.disabled=true;status.textContent='Sending…';
+ try{const r=await fetch('/api/customer-request/'+encodeURIComponent(token),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({answers})});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||'Could not send your answers');
+  status.textContent=d.answered<d.total?`Thanks — ${d.answered} of ${d.total} answers sent. You can add the rest any time.`:'Thanks — your answers have been sent. Add photos below if you can.';btn.textContent='Update my answers'}
+ catch(err){status.textContent=err.message}finally{btn.disabled=false}});
+})();

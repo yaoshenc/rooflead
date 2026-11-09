@@ -21,7 +21,7 @@ const worker = {
     // Meta's webhook authenticates with a signed body (FB_APP_SECRET), not a session.
     if (path === "/api/facebook/webhook") return facebookWebhook(request, env as any, ctx);
     // Customer photo uploads are authorised by an unguessable link token.
-    if (path.startsWith("/upload/") || path.startsWith("/api/customer-upload/")) return customerUpload(request, env as any);
+    if (path.startsWith("/upload/") || path.startsWith("/api/customer-upload/") || path.startsWith("/api/customer-request/")) return customerUpload(request, env as any);
     if (path === "/api/photos" || path.startsWith("/api/photos/") || path === "/api/upload-links") return photosEndpoint(request, env as any);
     if (path === "/api/inbound" || path === "/api/inbound/ack" || path.startsWith("/api/facebook/")) return inboundEndpoint(request, env as any);
     if (new URL(request.url).pathname==="/api/imagery") return imageryEndpoint(request, env as any);

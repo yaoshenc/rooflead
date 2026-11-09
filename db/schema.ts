@@ -29,4 +29,6 @@ export const jobPhotos = sqliteTable('job_photos', {
 export const uploadLinks = sqliteTable('upload_links', {
  tokenHash:text('token_hash').primaryKey(),owner:text('owner').notNull(),jobKey:text('job_key').notNull(),label:text('label').notNull(),
  maxPhotos:integer('max_photos').notNull(),expiresAt:integer('expires_at').notNull(),createdAt:integer('created_at').notNull(),
+ // Customer information request: questions asked, answers given online, first open time.
+ questions:text('questions'),answers:text('answers'),answeredAt:integer('answered_at'),openedAt:integer('opened_at'),
 },t=>[index('upload_links_owner_job').on(t.owner,t.jobKey)]);
