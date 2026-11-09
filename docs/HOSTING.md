@@ -49,3 +49,6 @@ The script writes `dist/server/wrangler.deploy.json`, creates the D1 database on
 
 - `APP_PASSWORD` — workspace login password (8+ characters). Changing it signs everyone out.
 - `OPENAI_API_KEY` — enables AI research and roof outlines (paid per use).
+- `FB_APP_SECRET`, `FB_VERIFY_TOKEN`, `FB_PAGE_ACCESS_TOKEN` — Facebook Lead Ads and Messenger leads with auto-replies. See [FACEBOOK.md](FACEBOOK.md).
+
+Migration `0002_facebook_inbound.sql` adds `inbound_leads` and `workspace_settings` (append-only; applied by the deploy script).

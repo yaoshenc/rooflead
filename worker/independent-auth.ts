@@ -128,6 +128,14 @@ export async function gateIndependent(request: Request, env: IndependentEnv): Pr
     });
   }
 
+  // Facebook calls this without a session; the handler verifies Meta's signature.
+  // Identity headers are stripped so it can never act as the signed-in owner.
+  if (url.pathname === "/api/facebook/webhook") {
+    const headers = new Headers();
+    for (const [k, v] of request.headers) if (!k.toLowerCase().startsWith("oai-")) headers.set(k, v);
+    return new Request(request, { headers });
+  }
+
   if (url.pathname === LOGOUT_PATH) {
     return new Response(null, {
       status: 303,

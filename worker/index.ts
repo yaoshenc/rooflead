@@ -1,6 +1,7 @@
 import { imageryEndpoint } from "../lib/imagery";
 import { outlineEndpoint } from "../lib/outline";
 import { researchEndpoint } from "../lib/research";
+import { facebookWebhook, inboundEndpoint } from "../lib/facebook";
 import handler from "vinext/server/fetch-handler";
 import { runWithConnectorBinding } from "../lib/connector-context";
 import type { ConnectorBinding } from "../lib/connector-contract.mjs";
@@ -15,6 +16,10 @@ const worker = {
       if (gated instanceof Response) return gated;
       request = gated;
     }
+    const path = new URL(request.url).pathname;
+    // Meta's webhook authenticates with a signed body (FB_APP_SECRET), not a session.
+    if (path === "/api/facebook/webhook") return facebookWebhook(request, env as any, ctx);
+    if (path === "/api/inbound" || path === "/api/inbound/ack" || path.startsWith("/api/facebook/")) return inboundEndpoint(request, env as any);
     if (new URL(request.url).pathname==="/api/imagery") return imageryEndpoint(request, env as any);
     if (new URL(request.url).pathname==="/api/outline") return outlineEndpoint(request, env as any);
     if (new URL(request.url).pathname.startsWith("/api/research")) return researchEndpoint(request, env as any);

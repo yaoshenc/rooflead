@@ -15,6 +15,13 @@
       "when": 1793781398871,
       "tag": "0001_massive_forgotten_one",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1794227859612,
+      "tag": "0002_facebook_inbound",
+      "breakpoints": true
     }
   ]
 }
