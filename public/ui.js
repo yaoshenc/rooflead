@@ -24,14 +24,38 @@ const baseRows=renderRows;
 renderRows=function(){baseRows();$$('#lead-rows tr[data-lead]').forEach(tr=>{const l=state.leads.find(x=>x.id===+tr.dataset.lead);const url=thumbUrl(l&&(l.report?.imagery||l.researchImagery));const t=tr.querySelector('.property-thumb');if(url&&t){t.innerHTML=`<img src="${esc(url)}" alt="" loading="lazy">`;t.firstChild.addEventListener('error',()=>{t.textContent='⌂'},{once:true})}})};
 
 // ---- Lead page: section navigation ----
+// The sticky bar sits directly under the (sticky) top bar; offsets are
+// measured, not hard-coded, so it never slides underneath it.
+const root=document.documentElement;
+function measure(){const tb=$('.topbar');root.style.setProperty('--topbar-h',(tb?Math.round(tb.getBoundingClientRect().height):0)+'px');const c=$('#content');if(c)root.style.setProperty('--content-pad',getComputedStyle(c).paddingLeft);const sn=$('.section-nav');root.style.setProperty('--secnav-h',(sn?Math.round(sn.getBoundingClientRect().height):0)+'px')}
+addEventListener('resize',measure);
 const SECTIONS=[['.research-card','Property'],['.takeoff-card','Take-off'],['.photos-card','Photos'],['.fb-card','Messages'],['.followup-card','Follow-ups'],['.detail-grid>div:last-child .card','Customer']];
+let secItems=[],spyRaf=0;
+const offset=()=>{const tb=$('.topbar')?.getBoundingClientRect().height||0,sn=$('.section-nav')?.getBoundingClientRect().height||0;return tb+sn+12};
+// When the customer column sits beside the main column it is always on screen,
+// so it is only a scroll target in the stacked (mobile) layout.
+const sideBySide=()=>{const g=$('.detail-grid');if(!g||g.children.length<2)return false;return g.children[1].getBoundingClientRect().left>g.children[0].getBoundingClientRect().left+20};
+function spy(){spyRaf=0;const navEl=$('.section-nav');if(!navEl||!secItems.length)return;
+ navEl.classList.toggle('stuck',navEl.getBoundingClientRect().top<=(($('.topbar')?.getBoundingClientRect().height)||0)+1);
+ const side=sideBySide(),line=offset()+8;let active=-1;
+ secItems.forEach(([el,,isSide],i)=>{if(side&&isSide)return;if(el.isConnected&&el.getBoundingClientRect().top<=line)active=i});
+ if(innerHeight+scrollY>=document.documentElement.scrollHeight-4){const last=secItems.map((x,i)=>[x,i]).filter(([x])=>!(side&&x[2])).pop();if(last)active=last[1]}
+ if(active<0)active=0;
+ $$('.section-nav button').forEach((b,j)=>{b.classList.toggle('active',j===active);b.setAttribute('aria-current',j===active?'true':'false')})}
+addEventListener('scroll',()=>{if(!spyRaf)spyRaf=requestAnimationFrame(spy)},{passive:true});
+addEventListener('resize',()=>{if(!spyRaf)spyRaf=requestAnimationFrame(spy)});
 const baseDetail=renderDetail;
-renderDetail=function(){baseDetail();const grid=$('.detail-grid');if(!grid)return;
- const items=SECTIONS.map(([sel,label])=>[document.querySelector(sel),label]).filter(([el])=>el);if(items.length<3)return;
+renderDetail=function(){baseDetail();secItems=[];const grid=$('.detail-grid');if(!grid)return;
+ const side=grid.children[1];
+ secItems=SECTIONS.map(([sel,label])=>{const el=document.querySelector(sel);return el&&[el,label,!!side&&side.contains(el)]}).filter(Boolean);
+ if(secItems.length<3){secItems=[];return}
  const navEl=document.createElement('div');navEl.className='section-nav';navEl.setAttribute('role','navigation');navEl.setAttribute('aria-label','Sections');
- navEl.innerHTML=items.map(([,label],i)=>`<button type="button" data-sec="${i}">${label}</button>`).join('');grid.before(navEl);
- navEl.onclick=e=>{const b=e.target.closest('[data-sec]');if(!b)return;const el=items[+b.dataset.sec][0];const y=el.getBoundingClientRect().top+scrollY-120;scrollTo({top:y,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'})};
- if('IntersectionObserver' in window){const io=new IntersectionObserver(es=>{for(const en of es)if(en.isIntersecting){const i=items.findIndex(([el])=>el===en.target);$$('.section-nav button').forEach((b,j)=>b.classList.toggle('active',j===i))}},{rootMargin:'-130px 0px -60% 0px'});items.forEach(([el])=>io.observe(el))}
+ navEl.innerHTML=secItems.map(([,label,isSide],i)=>`<button type="button" data-sec="${i}" ${isSide?'data-side="1"':''}>${label}</button>`).join('');grid.before(navEl);
+ navEl.onclick=e=>{const b=e.target.closest('[data-sec]');if(!b)return;const el=secItems[+b.dataset.sec][0];
+  // Side-by-side, the customer column is already visible: highlight it instead of scrolling.
+  if(b.dataset.side&&sideBySide()){el.classList.remove('flash');void el.offsetWidth;el.classList.add('flash');return}
+  scrollTo({top:el.getBoundingClientRect().top+scrollY-offset(),behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'})};
+ measure();spy();
 };
 
 // ---- Settings: group cards into tabs ----

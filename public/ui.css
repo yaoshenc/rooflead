@@ -104,12 +104,14 @@ table td{font-size:14px}
 #toast{border-radius:999px;font-size:13px;box-shadow:var(--shadow-lg);padding:11px 18px}
 
 /* ---- Lead page: section nav + sticky side column ---- */
-.section-nav{position:sticky;top:57px;z-index:15;display:flex;gap:6px;overflow-x:auto;margin:-6px 0 18px;padding:8px 0;background:linear-gradient(var(--bg) 70%,#f4f6f900);scrollbar-width:none}
+.section-nav{position:sticky;top:var(--topbar-h,76px);z-index:15;display:flex;gap:6px;overflow-x:auto;margin:-6px calc(-1 * var(--content-pad,24px)) 16px;padding:10px var(--content-pad,24px);background:var(--bg);border-bottom:1px solid transparent;transition:border-color .15s,box-shadow .15s;scrollbar-width:none}
+.section-nav.stuck{border-bottom-color:var(--line);box-shadow:0 6px 12px -10px #17203340}
 .section-nav::-webkit-scrollbar{display:none}
 .section-nav button{flex-shrink:0;font-size:13px;font-weight:500;padding:7px 13px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--ink-2)}
 .section-nav button:hover{border-color:var(--line-2);color:var(--ink)}
 .section-nav button.active{background:var(--brand);border-color:var(--brand);color:#fff}
-@media(min-width:1101px){.detail-grid>div:last-child{position:sticky;top:112px;align-self:start;max-height:calc(100vh - 128px);overflow:auto;scrollbar-width:thin}}
+@media(min-width:1101px){.detail-grid>div:last-child{position:sticky;top:calc(var(--topbar-h,76px) + var(--secnav-h,56px) + 12px);align-self:start;max-height:calc(100vh - var(--topbar-h,76px) - var(--secnav-h,56px) - 24px);overflow:auto;scrollbar-width:thin}}
+.card.flash{animation:card-flash 1.1s ease}@keyframes card-flash{0%,100%{box-shadow:var(--shadow-sm)}30%{box-shadow:0 0 0 3px #2f6fde66}}
 
 /* ---- Settings tabs ---- */
 .settings-tabs{display:flex;gap:4px;overflow-x:auto;margin:-4px 0 18px;padding:4px;background:#e9edf3;border-radius:var(--r);width:max-content;max-width:100%;scrollbar-width:none}
@@ -174,7 +176,6 @@ table td{font-size:14px}
  .pb-table td:nth-child(6){grid-column:2;grid-row:2/4;align-self:center}
  .apply-table thead{display:none}.apply-table tr{display:grid;grid-template-columns:1fr 1fr;gap:6px}.apply-table td:first-child{grid-column:1/-1}
  .journey-steps{overflow-x:auto}
- .section-nav{top:0}
  .settings-tabs{width:auto}
  .tpl-row{grid-template-columns:1fr 1fr}
 }
