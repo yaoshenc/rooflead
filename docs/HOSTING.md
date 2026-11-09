@@ -28,3 +28,24 @@ Keep API keys in server runtime secret storage. Preserve NSW imagery attribution
 - `npm run db:generate` generates migrations after intentional schema changes; inspect them before applying.
 
 The repository does not currently define an automated test script or deployment CI. Before a release, manually check lead creation/editing, persistence after reload, quote calculations, roof geometry editing, PDF export and mobile layout. Test research/outline success and error states only with an intentionally configured development API account and database.
+
+## Independent Cloudflare deployment (implemented)
+
+An independent deployment runs at https://rooflead.cindyshi688.workers.dev (Worker `rooflead`, D1 database `rooflead-db`; see `deploy/cloudflare.json`). It is separate from the Sites deployment above and has its own, empty data.
+
+**Authentication.** The deploy script sets `ROOFLEAD_HOSTING=independent`, which enables `worker/independent-auth.ts`: every page and API request requires a signed, HttpOnly session cookie obtained by entering the `APP_PASSWORD` Worker secret at `/login` (sign out at `/logout`). Client-supplied `oai-*` headers are stripped and replaced with a server-assigned owner (`ROOFLEAD_OWNER_ID`, default `rooflead-owner`). Without `APP_PASSWORD` the Worker answers 503 (fail closed). Browser files in `public/` are not secret and are served without login. This is a single shared workspace password, not per-user accounts. Sites deployments do not set the variable and are unaffected.
+
+**Deploy / redeploy** (needs a Cloudflare API token with Workers Scripts: Edit, D1: Edit and Account Settings: Read):
+
+```sh
+npm run install:ci
+npm run build
+CLOUDFLARE_API_TOKEN=... CLOUDFLARE_ACCOUNT_ID=... npm run deploy:cloudflare
+```
+
+The script writes `dist/server/wrangler.deploy.json`, creates the D1 database on first run (recording its id in `deploy/cloudflare.json`), applies migrations with `wrangler d1 migrations apply` (tracked in `d1_migrations`, so already-applied files are skipped) and deploys. By default the `public/` files are embedded into the Worker bundle; `--static-assets` uses Cloudflare static asset hosting instead. `--dry` validates without deploying. A GitHub push does not deploy.
+
+**Secrets** (set once; Cloudflare dashboard → Workers & Pages → rooflead → Settings → Variables and Secrets, or `npx wrangler secret put NAME --config dist/server/wrangler.deploy.json`):
+
+- `APP_PASSWORD` — workspace login password (8+ characters). Changing it signs everyone out.
+- `OPENAI_API_KEY` — enables AI research and roof outlines (paid per use).
