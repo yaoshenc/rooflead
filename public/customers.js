@@ -4,8 +4,9 @@
 // notes/tags kept with the workspace. No web look-ups of private people.
 (()=>{
 const DAY=864e5;
-const icon=(n,c)=>window.rlIcon?rlIcon(n,c):'';
-const tag=(v,q)=>window.rlTag?rlTag(v,q):`<span>${esc(v)}</span>`;
+const GLYPH={plus:'＋',search:'⌕',phone:'☎',mail:'✉',message:'◍',globe:'◎',pencil:'▱',megaphone:'▱',check:'✓',file:'▧',ruler:'⌖',home:'⌂',users:'◉'};
+const icon=n=>window.rlIcon?rlIcon(n):`<span class="cust-glyph" aria-hidden="true">${GLYPH[n]||''}</span>`;
+const tag=(v,q)=>window.rlTag?rlTag(v,q):`<span class="cust-tag-m">${esc(v)}</span>`;
 const digits=p=>String(p||'').replace(/\D/g,'').replace(/^61/,'0');
 const money=n=>Number(n||0).toLocaleString('en-AU',{style:'currency',currency:'AUD',maximumFractionDigits:0});
 const initials=n=>(n||'?').trim().split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase();
@@ -100,7 +101,7 @@ function editCustomer(c){modal(`<h2>Customer details</h2><p>Updates all ${c.lead
 function newProject(c){addLead();const f=$('#lead-form');if(!f)return;for(const [k,v] of [['name',c.name],['email',c.email],['phone',c.phone]]){const i=f.querySelector(`[name=${k}]`);if(i&&v)i.value=v}f.querySelector('[name=address]')?.focus();const h=$('#modal h2');if(h)h.textContent=`New project for ${c.name}`}
 
 // ---- Wiring: nav, routing, lead panel link ----
-const navBtn=document.createElement('button');navBtn.dataset.nav='customers';navBtn.innerHTML=`<span>${icon('users')||'◉'}</span> Customers`;$('nav [data-nav="quotes"]')?.before(navBtn);navBtn.onclick=()=>nav('customers');
+const navBtn=document.createElement('button');navBtn.dataset.nav='customers';navBtn.innerHTML='<span>◉</span> Customers';$('nav [data-nav="quotes"]')?.before(navBtn);navBtn.onclick=()=>nav('customers');
 const baseRender=render;render=function(){if(page==='customers'){updateCounts();renderCustomers();return}if(page==='customer'){updateCounts();renderCustomer();return}baseRender()};
 const baseNav=nav;nav=function(p){baseNav(p);if(p==='customers')$('#breadcrumb').textContent='Customers'};
 const baseDetail=renderDetail;

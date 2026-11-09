@@ -1,0 +1,55 @@
+/* Customers directory and profiles (styled to match ui.css). */
+:root{--raised:#f1f4f8;--mono:'DM Sans',sans-serif;--ease:ease;--surface:#fff}
+.job-cell{display:grid;gap:4px;justify-items:start}
+.cust-glyph{display:inline-block;width:16px;text-align:center;color:var(--muted)}
+.cust-tag-m{font-size:12px;font-weight:600;color:var(--ink-2);background:#f1f4f8;border-radius:6px;padding:1px 7px}
+.cust-sort .filter{font-size:13px;padding:10px 10px}
+/* ---- Customers ---- */
+.cust-avatar{width:36px;height:36px;border-radius:50%;background:var(--accent-soft);color:var(--brand);display:grid;place-items:center;font-weight:600;font-size:13px;flex-shrink:0}
+.cust-avatar.lg{width:56px;height:56px;font-size:18px}
+.cust-count{font-family:var(--mono)!important;font-weight:500}
+.cust-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.cust-tags span{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:1px 6px;border-radius:4px;background:var(--raised);color:var(--ink-2)}
+.cust-tags.edit{margin:0 0 10px;align-items:center}
+.cust-tags.edit input{border:0!important;box-shadow:none!important;padding:2px 4px;font-size:12px;min-width:90px;flex:1;background:none}
+.cust-tags.edit button{font-size:12px;color:var(--muted);line-height:1;padding:0 2px}
+.cust-sort{display:flex;gap:4px;flex-wrap:wrap}
+.cust-table .num{text-align:right;font-family:var(--mono)!important}
+.cust-table tbody tr{cursor:pointer}
+.cust-head{display:flex;gap:16px;align-items:flex-start;margin:8px 0 24px;flex-wrap:wrap}
+.cust-head>div:nth-child(2){flex:1;min-width:220px}
+.cust-head h1{margin:0}.cust-head p{margin:4px 0 10px;color:var(--muted)}
+.cust-head .hub-contacts{padding:0}
+.cust-actions{display:flex;gap:8px;flex-wrap:wrap}
+.proj-list{display:grid;gap:8px}
+.proj{display:flex;gap:12px;align-items:center;width:100%;text-align:left;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--surface);transition:background-color .15s var(--ease),border-color .15s var(--ease)}
+.proj:hover{background:var(--raised);border-color:var(--line-2)}
+.proj-img{width:72px;height:72px;border-radius:8px;overflow:hidden;background:var(--raised);display:grid;place-items:center;color:var(--muted);flex-shrink:0}
+.proj-img img{width:100%;height:100%;object-fit:cover;display:block}
+.proj-body{display:grid;gap:3px;min-width:0}.proj-body b{font-size:14px}.proj-body small{color:var(--muted)}
+.proj-meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:3px}
+.proj-q{font-family:var(--mono)!important;font-size:11px;color:var(--ink-2)}
+.cust-history{list-style:none;margin:0;padding:0;display:grid}
+.cust-history li{display:grid;grid-template-columns:28px 1fr auto;gap:10px;align-items:start;padding:10px 0;border-bottom:1px solid var(--line)}
+.cust-history li:last-child{border-bottom:0}
+.ch-ic{width:28px;height:28px;border-radius:8px;background:var(--raised);display:grid;place-items:center;color:var(--ink-2)}
+.cust-history p{margin:0;font-size:13px!important;color:var(--ink)!important}.cust-history small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+.cust-history time{font-size:12px;color:var(--muted);white-space:nowrap}
+.cust-link{font-weight:600;color:var(--brand);padding:0;text-decoration:underline;text-decoration-color:#1f3a5f40;text-underline-offset:2px}
+.cust-facts{display:grid;grid-template-columns:auto 1fr;gap:8px 16px;margin:0 0 12px;font-size:13px}
+.cust-facts dt{color:var(--muted)}.cust-facts dd{margin:0;font-weight:500;text-align:right}
+#cust-notes textarea{width:100%;margin-bottom:10px}
+.hub-profile{display:block;margin-top:2px;padding:0;font-size:12px;font-weight:600;color:var(--brand)}
+.hub-profile:hover{text-decoration:underline}
+@media(max-width:750px){
+ .cust-table tbody tr{display:grid!important;grid-template-columns:1fr auto;gap:6px 12px;padding:14px 16px}
+ .cust-table tbody td{order:0!important;grid-column:auto!important;color:inherit!important;font-size:13px!important}
+ .cust-table tbody td:nth-child(1){grid-column:1/-1!important}
+ .cust-table tbody td:nth-child(3){display:none!important}
+ .cust-table tbody td:nth-child(4){text-align:right}
+ .cust-facts dd{text-align:left}
+ .proj-img{width:56px;height:56px}
+}
+.cust-sort .filter{font-size:13px!important;padding:10px 10px!important;color:var(--muted)!important;font-weight:500!important}
+.cust-sort .filter.active{color:var(--ink)!important}
+.cust-table th.num{font-family:var(--font)!important}
