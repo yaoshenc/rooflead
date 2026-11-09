@@ -68,6 +68,8 @@ config.d1_databases = [
 ];
 config.workers_dev = true;
 config.preview_urls = false;
+// Keep variables added in the Cloudflare dashboard instead of deleting them on deploy.
+config.keep_vars = true;
 
 if (!staticAssets) {
   const types = { ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8", ".svg": "image/svg+xml", ".txt": "text/plain; charset=utf-8" };
