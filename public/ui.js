@@ -13,10 +13,10 @@ $('.sidebar .nav-label')?.before(sideSearch);sideSearch.onclick=()=>openPalette(
 const topSearch=document.createElement('button');topSearch.className='top-search';topSearch.type='button';topSearch.setAttribute('aria-label','Search leads, quotes and actions');topSearch.innerHTML=`<span aria-hidden="true">⌕</span><span class="ts-label">Search leads, quotes…</span><span class="kbd">${mod}</span>`;
 $('.top-right')?.prepend(topSearch);topSearch.onclick=()=>openPalette();
 const bottom=document.createElement('nav');bottom.className='bottom-nav';bottom.setAttribute('aria-label','Main');
-bottom.innerHTML=[['leads','▤','Leads'],['quotes','▧','Quotes'],['pricebook','☷','Prices'],['settings','⚙','Settings']].map(([k,i,t])=>`<button type="button" data-bnav="${k}"><span aria-hidden="true">${i}</span>${t}${k==='leads'?'<em id="bn-leads"></em>':''}</button>`).join('')+'<button type="button" data-bnav="search"><span aria-hidden="true">⌕</span>Search</button>';
+bottom.innerHTML=[['leads','▤','Leads'],['customers','◉','Customers'],['quotes','▧','Quotes'],['settings','⚙','Settings']].map(([k,i,t])=>`<button type="button" data-bnav="${k}"><span aria-hidden="true">${i}</span>${t}${k==='leads'?'<em id="bn-leads"></em>':''}</button>`).join('')+'<button type="button" data-bnav="search"><span aria-hidden="true">⌕</span>Search</button>';
 document.body.append(bottom);
 bottom.addEventListener('click',e=>{const b=e.target.closest('[data-bnav]');if(!b)return;const k=b.dataset.bnav;if(k==='search')return openPalette();nav(k)});
-function syncBottom(){const active=page==='detail'?'leads':page==='quote'||page==='invoice'?'quotes':page;$$('[data-bnav]').forEach(b=>b.classList.toggle('active',b.dataset.bnav===active));const n=state.leads.filter(l=>l.status==='New lead').length;const em=$('#bn-leads');if(em){em.textContent=n||'';em.hidden=!n}}
+function syncBottom(){const active=page==='detail'?'leads':page==='customer'?'customers':page==='quote'||page==='invoice'?'quotes':page;$$('[data-bnav]').forEach(b=>b.classList.toggle('active',b.dataset.bnav===active));const n=state.leads.filter(l=>l.status==='New lead').length;const em=$('#bn-leads');if(em){em.textContent=n||'';em.hidden=!n}}
 
 // ---- Aerial thumbnails in the leads list ----
 function thumbUrl(im){if(!im?.available||!Number.isFinite(im.latitude))return null;try{const u=new URL(im.imageUrl);const dx=22/(111320*Math.cos(im.latitude*Math.PI/180)),dy=22/111320;u.searchParams.set('bbox',[im.longitude-dx,im.latitude-dy,im.longitude+dx,im.latitude+dy].join(','));u.searchParams.set('size','96,96');return u.href}catch{return null}}
@@ -85,14 +85,15 @@ const ACTIONS=()=>[
  {g:'Actions',i:'＋',t:'Add a lead',s:'New enquiry',run:()=>{nav('leads');addLead()}},
  {g:'Actions',i:'▧',t:'Create a quote',s:'From a lead',run:()=>{nav('quotes');setTimeout(()=>$('#new-document')?.click(),50)}},
  {g:'Actions',i:'⤓',t:'Download a backup',s:'Settings · Data',run:()=>{store.set('rooflead-settings-tab','data');nav('settings');setTimeout(()=>$('#backup-download')?.click(),80)}},
- {g:'Go to',i:'▤',t:'Leads',run:()=>nav('leads')},{g:'Go to',i:'▧',t:'Quotes & invoices',run:()=>nav('quotes')},{g:'Go to',i:'☷',t:'Price book',run:()=>nav('pricebook')},{g:'Go to',i:'⚙',t:'Settings',run:()=>nav('settings')},
+ {g:'Go to',i:'▤',t:'Leads',run:()=>nav('leads')},{g:'Go to',i:'◉',t:'Customers',run:()=>nav('customers')},{g:'Go to',i:'▧',t:'Quotes & invoices',run:()=>nav('quotes')},{g:'Go to',i:'☷',t:'Price book',run:()=>nav('pricebook')},{g:'Go to',i:'⚙',t:'Settings',run:()=>nav('settings')},
 ];
 function search(q){q=q.trim().toLowerCase();const words=q.split(/\s+/).filter(Boolean);const match=s=>words.every(w=>s.includes(w));
  const leads=state.leads.filter(l=>!q||match(`${l.address} ${l.suburb} ${l.name} ${l.service} ${l.status} ${l.source}`.toLowerCase())).slice(0,q?8:5).map(l=>({g:'Leads',i:'⌂',t:l.address,s:`${l.name} · ${(l.suburb||'').split(',')[0]} · ${l.service}`,b:l.status,run:()=>openLead(l.id)}));
  const quotes=state.quotes.filter(x=>{const l=state.leads.find(y=>y.id===x.leadId);return q&&match(`qt-${x.id} ${x.status} ${l?.address||''} ${l?.name||''}`.toLowerCase())}).slice(0,5).map(x=>{const l=state.leads.find(y=>y.id===x.leadId);return {g:'Quotes',i:'▧',t:`QT-${x.id}`,s:`${l?.address||''} · ${l?.name||''}`,b:x.acceptance?'Accepted':x.quoteDocument?'Prepared':x.status,run:()=>openQuote(x.id)}});
+ const custs=(window.rlCustomers?.()||[]).filter(c=>q&&match(`${c.name} ${c.email} ${c.phone}`.toLowerCase())).slice(0,4).map(c=>({g:'Customers',i:'◉',t:c.name,s:`${c.leads.length} project${c.leads.length>1?'s':''} · ${c.phone||c.email||''}`,run:()=>openCustomer(c.key)}));
  const inv=(state.invoices||[]).filter(i=>q&&match(`${i.number} ${i.document?.customer?.name||''} ${i.document?.property||''}`.toLowerCase())).slice(0,3).map(i=>({g:'Invoices',i:'$',t:i.number,s:i.document?.property||'',b:i.status,run:()=>openInvoice(i.id)}));
  const acts=ACTIONS().filter(a=>!q||match((a.t+' '+(a.s||'')).toLowerCase()));
- return [...(q?[]:acts.filter(a=>a.g==='Actions')),...leads,...quotes,...inv,...(q?acts:acts.filter(a=>a.g==='Go to'))]}
+ return [...(q?[]:acts.filter(a=>a.g==='Actions')),...custs,...leads,...quotes,...inv,...(q?acts:acts.filter(a=>a.g==='Go to'))]}
 function draw(){const list=$('#palette-list');if(!results.length){list.innerHTML='<li class="palette-empty">No matches. Try an address, customer name or QT number.</li>';return}
  let g='';list.innerHTML=results.map((r,i)=>{const head=r.g!==g?`<li class="palette-group" role="presentation">${esc(r.g)}</li>`:'';g=r.g;return head+`<li class="palette-item" role="option" id="pi-${i}" aria-selected="${i===sel}" data-pi="${i}"><i aria-hidden="true">${r.i}</i><span><b>${esc(r.t)}</b>${r.s?`<small>${esc(r.s)}</small>`:''}</span>${r.b?badge(r.b):''}</li>`}).join('');
  $('#palette-q').setAttribute('aria-activedescendant','pi-'+sel);document.getElementById('pi-'+sel)?.scrollIntoView({block:'nearest'})}

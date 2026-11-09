@@ -28,13 +28,14 @@ const P={
  map:'<path d="M9 4.5 3.5 6.5v13L9 17.5l6 2 5.5-2v-13L15 6.5z"/><path d="M9 4.5v13M15 6.5v13"/>',
  check:'<path d="m5 12.5 4.5 4.5L19 7.5"/>',
  megaphone:'<path d="M4 10v4h3l7 4V6l-7 4z"/><path d="M17.5 9.5a3.5 3.5 0 0 1 0 5"/>',
+ users:'<circle cx="9" cy="8.5" r="3.5"/><path d="M3 19.5c.6-3.3 3-5 6-5s5.4 1.7 6 5"/><path d="M15.5 5.2a3.3 3.3 0 0 1 0 6.6M17.5 14.8c1.9.6 3.1 2.2 3.5 4.7"/>',
  ruler:'<path d="M3.5 15.5 15.5 3.5l5 5-12 12z"/><path d="m7.5 11.5 2 2M10.5 8.5l2 2M13.5 5.5l2 2"/>',
 };
 const icon=(n,cls='')=>`<span class="ic ${cls}" aria-hidden="true"><svg viewBox="0 0 24 24">${P[n]}</svg></span>`;
 window.rlIcon=icon;
 // Text glyphs used as icons → line icons (null = drop the glyph).
-const G={'⌂':'home','▤':'inbox','▧':'file','☷':'list','⚙':'sliders','⌕':'search','♧':'phone','☎':'phone','✉':'mail','◍':'message','◎':'globe','▱':'pencil','↗':'arrow','◷':'clock','＋':'plus','⤓':'download','⌖':'target','↶':'undo','⤢':'expand','✧':'scan'};
-const GLYPH_RE=/[⌂▤▧☷⚙⌕♧☎✉◍◎▱↗◷＋⤓⌖↶⤢✧]/;
+const G={'⌂':'home','▤':'inbox','▧':'file','☷':'list','⚙':'sliders','⌕':'search','♧':'phone','☎':'phone','✉':'mail','◍':'message','◎':'globe','▱':'pencil','↗':'arrow','◷':'clock','＋':'plus','⤓':'download','⌖':'target','↶':'undo','⤢':'expand','✧':'scan','◉':'users'};
+const GLYPH_RE=/[⌂▤▧☷⚙⌕♧☎✉◍◎▱↗◷＋⤓⌖↶⤢✧◉]/;
 const SKIP='textarea,input,svg,script,style,.hub-bubble,.fb-msg,.mail-body,.phone-bubble,.request-message,code,pre,.palette-input,.ic,.paper-lines td:first-child';
 function iconizeText(node){const t=node.nodeValue;if(!GLYPH_RE.test(t))return;const el=node.parentElement;if(!el||el.closest(SKIP))return;
  const inButton=!!el.closest('button,a,.filter,.sidebar-search,.top-search,label.search');
@@ -61,7 +62,7 @@ const COPY={
 };
 const ACRONYM=new Set(['AI','QT','NSW','PDF','SMS','GST','AUD','ABN','ID','INV','URL']);
 function sentence(s){return s.toLowerCase().replace(/\b[a-z]+\b/g,w=>ACRONYM.has(w.toUpperCase())?w.toUpperCase():w).replace(/^\s*([a-z])/,m=>m.toUpperCase())}
-function copyText(node){const raw=node.nodeValue,t=raw.replace(/[⌂▤▧☷⚙⌕♧☎✉◍◎▱↗◷＋⤓⌖↶⤢✧]/g,'').replace(/\s+/g,' ').trim();if(!t)return;const el=node.parentElement;if(!el||el.closest(SKIP))return;
+function copyText(node){const raw=node.nodeValue,t=raw.replace(/[⌂▤▧☷⚙⌕♧☎✉◍◎▱↗◷＋⤓⌖↶⤢✧◉]/g,'').replace(/\s+/g,' ').trim();if(!t)return;const el=node.parentElement;if(!el||el.closest(SKIP))return;
  if(Object.prototype.hasOwnProperty.call(COPY,t)){node.nodeValue=COPY[t];return}
  // Uppercase labels in the interface become sentence case.
  if(t.length>3&&/^[A-Z][A-Z &/,'·-]+$/.test(t)&&!ACRONYM.has(t)&&el.closest('.eyebrow,.nav-label,th,.cu-step,.connection-context,.req-steps,.document-paper,.paper-label,.palette-group,label,h3,.stat-label'))node.nodeValue=raw.replace(t,sentence(t))}
