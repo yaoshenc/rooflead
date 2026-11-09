@@ -47,10 +47,13 @@ function takeoff(points,opts={}){
 // Labels sit just outside each edge so the roof itself stays visible.
 function edgeLabels(points,w=120,h=120,fs=20){
  if(!points||points.length<2)return '';const closed=points.length>2,cx=points.reduce((a,p)=>a+p.x,0)/points.length,cy=points.reduce((a,p)=>a+p.y,0)/points.length;let out='';
- const n=closed?points.length:points.length-1;
- for(let i=0;i<n;i++){const a=points[i],b=points[(i+1)%points.length];const len=Math.hypot((b.x-a.x)*w/1000,(b.y-a.y)*h/1000),px=Math.hypot(b.x-a.x,b.y-a.y);if(len<1||px<fs*1.2)continue;
+ const n=closed?points.length:points.length-1,placed=[];
+ // Longest edges are labelled first; a label that would overlap another is skipped.
+ const order=[...Array(n).keys()].sort((i,j)=>{const L=k=>{const a=points[k],b=points[(k+1)%points.length];return Math.hypot(b.x-a.x,b.y-a.y)};return L(j)-L(i)});
+ for(const i of order){const a=points[i],b=points[(i+1)%points.length];const len=Math.hypot((b.x-a.x)*w/1000,(b.y-a.y)*h/1000),px=Math.hypot(b.x-a.x,b.y-a.y);if(len<1||px<fs*1.2)continue;
   let nx=(b.y-a.y)/px,ny=-(b.x-a.x)/px;const mx0=(a.x+b.x)/2,my0=(a.y+b.y)/2;if(closed&&(mx0+nx-cx)**2+(my0+ny-cy)**2<(mx0-nx-cx)**2+(my0-ny-cy)**2){nx=-nx;ny=-ny}
   const mx=mx0+nx*fs*1.15,my=my0+ny*fs*1.15,label=len.toFixed(1)+' m',tw=fs*(label.length*0.56+0.8);
+  const box={x0:mx-tw/2,x1:mx+tw/2,y0:my-fs*0.72,y1:my+fs*0.64};if(placed.some(q=>box.x0<q.x1&&box.x1>q.x0&&box.y0<q.y1&&box.y1>q.y0))continue;placed.push(box);
   out+=`<g class="edge-label" pointer-events="none"><rect x="${mx-tw/2}" y="${my-fs*0.72}" width="${tw}" height="${fs*1.36}" rx="${fs*0.3}" fill="#0f1b2cd9"/><text x="${mx}" y="${my+fs*0.36}" text-anchor="middle" font-size="${fs}" font-weight="600" fill="#fff">${label}</text></g>`}
  return out;
 }
@@ -83,7 +86,7 @@ openRoofEditor=function(l){
  baseOpen(l);if(!roofEditor||!$('#roof-canvas'))return;
  const o=optionsFor(l);roofEditor.estimate={...o};
  if(roofEditor.pitch===''||roofEditor.pitch==null){roofEditor.pitch=o.pitch;$('#roof-pitch').value=o.pitch}
- const svg=$('#roof-canvas'),img=svg.querySelector('image');if(img)img.setAttribute('href',RE.hiRes(img.getAttribute('href')));
+ const svg=$('#roof-canvas'),img=svg.querySelector('image');if(img){const hi=img.cloneNode();hi.setAttribute('href',RE.hiRes(img.getAttribute('href')));img.after(hi)}
  svg.insertAdjacentHTML('beforeend','<g id="roof-overlay"></g><g id="roof-edge-labels"></g>');
  roofEditor.view=roofEditor.points.length>2?RE.focus(roofEditor.points):{x:0,y:0,s:1000};
  $('.roof-tools').insertAdjacentHTML('afterbegin','<span class="zoom-tools" role="group" aria-label="Zoom"><button type="button" class="secondary" id="zoom-fit" title="Zoom to roof">⤢ Fit roof</button><button type="button" class="secondary" id="zoom-in" aria-label="Zoom in">＋</button><button type="button" class="secondary" id="zoom-out" aria-label="Zoom out">－</button></span>');
@@ -115,7 +118,7 @@ saveRoofArea=function(){const e=roofEditor;if(!e)return;const l=e.lead,q=current
 // ---- Lead detail: measured satellite view + take-off card ----
 const basePanel=aerialPanel;
 aerialPanel=function(l){let html=basePanel(l);const im=imageryOf(l),pts=l.roofOutline?.points;if(!im?.available)return html;const w=im.widthMeters||120,h=im.heightMeters||120,valid=pts?.length>=3&&!RG.validation(pts),v=valid?RE.focus(pts,1.1,260):{x:0,y:0,s:1000};
- html=html.replace(/(<div class="inline-roof-image"><svg) viewBox="0 0 1000 1000"/,`$1 viewBox="${v.x} ${v.y} ${v.s} ${v.s}"`).replace(/(<image href=")([^"]+)(")/,(m,a,u,b)=>a+esc(RE.hiRes(u.replace(/&amp;/g,'&')))+b);
+ html=html.replace(/(<div class="inline-roof-image"><svg) viewBox="0 0 1000 1000"/,`$1 viewBox="${v.x} ${v.y} ${v.s} ${v.s}"`).replace(/<image href="([^"]+)"([^>]*)\/?>/,(m,u,rest)=>`<image href="${u}"${rest}/><image href="${esc(RE.hiRes(u.replace(/&amp;/g,'&')))}"${rest}/>`);
  if(valid){const u=v.s/1000;html=html.replace(/(<polygon points="[^"]*" fill="#3e8dff55" stroke="#78bdff" stroke-width=")5"/,'$1'+(5*u)+'"').replace(/<circle cx="([\d.]+)" cy="([\d.]+)" r="6" fill="white" stroke="#337ee4" stroke-width="2"\/>/g,(m,x,y)=>`<circle cx="${x}" cy="${y}" r="${6*Math.max(u,.4)}" fill="white" stroke="#337ee4" stroke-width="${2*Math.max(u,.4)}"/>`);
   const extra=RE.addressPin(v)+RE.edgeLabels(pts,w,h,RE.labelSize(v)*1.1)+RE.scaleBar(w,v);const i=html.indexOf('</svg>');if(i>0)html=html.slice(0,i)+extra+html.slice(i);
   html=html.replace('NSW aerial imagery · north up',`NSW aerial imagery · zoomed to roof (≈ ${Math.round(v.s*w/1000)} m across) · north up`)}
@@ -150,4 +153,18 @@ ensureAutomaticOutline=async function(l){const im=imageryOf(l);if(!l.researchJob
  autoStarts.add(key);l.outlineAutoResearchId=key;l.outlineState='researching';l.outlineError='';save();refreshInlineOutline(l);
  try{const d=await startOutline(l,{automatic:true});l.outlineJob=d.id;l.outlineState=d.status;save();if(d.status==='researching')pollOutline(l,d.id);else acceptOutline(l,d)}catch(err){l.outlineState='failed';l.outlineError=err.message;save();refreshInlineOutline(l)}finally{autoStarts.delete(key)}};
 if(page==='detail')renderDetail();
+})()}
+
+// Quote page: satellite view of the property (with the measured outline) in the Property brief card.
+if(typeof document!=='undefined'&&typeof renderQuote==='function'){(function(){
+const RE=RoofEstimate,RG=RoofGeometry;
+const baseQuote=renderQuote;
+renderQuote=function(){baseQuote();const q=state.quotes.find(x=>x.id===currentId);if(!q)return;const l=state.leads.find(x=>x.id===q.leadId);const im=l&&(l.report?.imagery||l.researchImagery);if(!im?.available)return;
+ const brief=[...document.querySelectorAll('.commercial-layout .card, .detail-grid .card')].find(c=>/Property brief/.test(c.querySelector('h2')?.textContent||''));if(!brief)return;
+ const w=im.widthMeters||120,h=im.heightMeters||120,pts=l.roofOutline?.points,valid=pts?.length>=3&&!RG.validation(pts),v=valid?RE.focus(pts,1.1,260):RE.focus([{x:440,y:440},{x:560,y:560}],0,260),u=v.s/1000;
+ const fig=document.createElement('figure');fig.className='quote-aerial';
+ fig.innerHTML=`<svg viewBox="${v.x} ${v.y} ${v.s} ${v.s}" role="img" aria-label="Aerial view of ${esc(l.address)}"><image href="${esc(safeLink(im.imageUrl))}" width="1000" height="1000" preserveAspectRatio="none"/><image href="${esc(safeLink(RE.hiRes(im.imageUrl)))}" width="1000" height="1000" preserveAspectRatio="none"/>${valid?`<polygon points="${pts.map(p=>p.x+','+p.y).join(' ')}" fill="#3e8dff40" stroke="#78bdff" stroke-width="${5*u}"/>`+RE.edgeLabels(pts,w,h,RE.labelSize(v)*1.15):RE.addressPin(v)}${RE.scaleBar(w,v)}</svg><figcaption>${valid?`${l.roofMeasurement?.surface??''} m² roof surface · ${l.roofMeasurement?.pitch??''}° pitch · `:''}NSW aerial imagery · north up</figcaption>`;
+ const h2=brief.querySelector('h2');(brief.querySelector('p')||h2).after(fig);
+};
+if(page==='quote')renderQuote();
 })()}

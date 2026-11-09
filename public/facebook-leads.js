@@ -32,6 +32,7 @@ async function poll(force){
 setInterval(()=>{if(document.visibilityState==='visible')poll()},60000);
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')poll()});
 setTimeout(()=>poll(true),1500);
+window.pollInboundLeads=poll;
 
 // ---- Lead detail: conversation / form answers ----
 function when(t){try{return new Date(t).toLocaleString('en-AU',{day:'numeric',month:'short',hour:'numeric',minute:'2-digit'})}catch{return ''}}
