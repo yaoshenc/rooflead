@@ -52,7 +52,7 @@ For a shared business workspace, a future change should move leads/quotes/settin
 
 ## Share and improve
 
-Read [GitHub setup](docs/GITHUB.md), [contribution instructions](CONTRIBUTING.md) and [AI assistant instructions](AGENTS.md). Existing detailed framework/runtime notes are retained in [STARTER.md](docs/STARTER.md).
+Read [GitHub setup](docs/GITHUB.md), [contribution instructions](CONTRIBUTING.md) and [AI assistant instructions](AGENTS.md). The interface polish follows the unslop process by Damir Sokolovsky (@heydamir, CC BY 4.0); see `public/unslop.css`. Existing detailed framework/runtime notes are retained in [STARTER.md](docs/STARTER.md).
 
 ## Verification and provenance
 
