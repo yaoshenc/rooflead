@@ -28,3 +28,31 @@ Keep API keys in server runtime secret storage. Preserve NSW imagery attribution
 - `npm run db:generate` generates migrations after intentional schema changes; inspect them before applying.
 
 The repository does not currently define an automated test script or deployment CI. Before a release, manually check lead creation/editing, persistence after reload, quote calculations, roof geometry editing, PDF export and mobile layout. Test research/outline success and error states only with an intentionally configured development API account and database.
+
+## Independent Cloudflare deployment (implemented)
+
+An independent deployment runs at https://rooflead.cindyshi688.workers.dev (Worker `rooflead`, D1 database `rooflead-db`; see `deploy/cloudflare.json`). It is separate from the Sites deployment above and has its own, empty data.
+
+**Authentication.** The deploy script sets `ROOFLEAD_HOSTING=independent`, which enables `worker/independent-auth.ts`: every page and API request requires a signed, HttpOnly session cookie obtained by entering the `APP_PASSWORD` Worker secret at `/login` (sign out at `/logout`). Client-supplied `oai-*` headers are stripped and replaced with a server-assigned owner (`ROOFLEAD_OWNER_ID`, default `rooflead-owner`). Without `APP_PASSWORD` the Worker answers 503 (fail closed). Browser files in `public/` are not secret and are served without login. This is a single shared workspace password, not per-user accounts. Sites deployments do not set the variable and are unaffected.
+
+**Deploy / redeploy** (needs a Cloudflare API token with Workers Scripts: Edit, D1: Edit and Account Settings: Read):
+
+```sh
+npm run install:ci
+npm run build
+CLOUDFLARE_API_TOKEN=... CLOUDFLARE_ACCOUNT_ID=... npm run deploy:cloudflare
+```
+
+The script writes `dist/server/wrangler.deploy.json`, creates the D1 database on first run (recording its id in `deploy/cloudflare.json`), applies migrations with `wrangler d1 migrations apply` (tracked in `d1_migrations`, so already-applied files are skipped) and deploys. By default the `public/` files are embedded into the Worker bundle; `--static-assets` uses Cloudflare static asset hosting instead. `--dry` validates without deploying. A GitHub push does not deploy.
+
+**Secrets** (set once; Cloudflare dashboard → Workers & Pages → rooflead → Settings → Variables and Secrets, or `npx wrangler secret put NAME --config dist/server/wrangler.deploy.json`):
+
+- `APP_PASSWORD` — workspace login password (8+ characters). Changing it signs everyone out.
+- `OPENAI_API_KEY` — enables AI research and roof outlines (paid per use).
+- `FB_APP_SECRET`, `FB_VERIFY_TOKEN`, `FB_PAGE_ACCESS_TOKEN` — Facebook Lead Ads and Messenger leads with auto-replies. See [FACEBOOK.md](FACEBOOK.md).
+
+Migration `0004_info_requests.sql` adds `questions`, `answers`, `answered_at` and `opened_at` to `upload_links`: the customer link doubles as an information-request form whose answers sync back into the lead.
+
+Migration `0003_job_photos.sql` adds `job_photos` (JPEG bytes + thumbnails, owner-scoped) and `upload_links` (customer upload tokens, stored as SHA-256 hashes). Customer upload pages (`/upload/<token>`) are public by design; they can only add up to 20 photos to one job and expire after 14 days. On the owner-private Sites deployment, customers cannot reach these links.
+
+Migration `0002_facebook_inbound.sql` adds `inbound_leads` and `workspace_settings` (append-only; applied by the deploy script).
