@@ -100,15 +100,18 @@ requestDetails=l=>previewFollowup(l);
 
 // ---- Lead card ----
 followupCard=function(l){const f=l.followupFlow;
- if(!f)return `<section class="card"><div class="card-header"><h2>Customer follow-ups</h2><span class="pill">Automatic</span></div><p>Ask the customer for missing details with one tap. They answer on a simple form — no texting back and forth.</p><button class="primary full" data-req="prepare">Ask customer for details</button></section>`;
- const left=open(l),done=f.items.length-left.length,complete=!left.length;
- const state_=complete?['ready','All details received']:f.paused?['waiting','Paused']:f.openedAt&&f.sent?['research','Customer opened form']:f.sent?['waiting','Waiting for customer']:['new','Ready to send'];
- const next=!complete&&!f.paused&&f.sent&&S.autoRequest&&(f.sent-1)<S.maxReminders?`<div class="followup-next"><span>Next automatic reminder</span><b>${esc(when(f.reminderAt))}</b></div>`:'';
- return `<section class="card followup-card"><div class="card-header"><h2>Customer follow-ups</h2><span class="badge ${state_[0]}">${state_[1]}</span></div>
- <div class="followup-progress"><span style="width:${done/f.items.length*100}%"></span></div><div class="followup-count">${done} of ${f.items.length} details collected${f.lastSentAt?` · last sent ${esc(when(f.lastSentAt))}`:''}</div>
- <div class="followup-items">${f.items.map(q=>`<div><span class="followup-check ${q.answer?'done':''}">${q.answer?'✓':'○'}</span><span>${esc(q.label)}${q.answer?`<small>${esc(q.answer)}${q.online?' · answered online':''}</small>`:''}</span></div>`).join('')}</div>
- ${next}${complete?'<p class="completion-note">✓ Reminders stopped. All requested details received.</p>':`<div class="inline-buttons"><button class="primary" data-req="preview">${f.sent?'View / send reminder':'Preview & send'} ↗</button><button class="secondary" data-req="reply">Record reply</button></div><div class="followup-actions"><button data-req="pause">${f.paused?'Resume automation':'Pause automation'}</button></div>`}
- <details class="followup-history"><summary>Activity</summary>${f.history.slice(-6).reverse().map(h=>`<p><b>${esc(h.event)}</b><small>${esc(new Date(h.at).toLocaleString('en-AU'))}</small></p>`).join('')}</details></section>`};
+ if(!f)return `<section class="card followup-card fu"><div class="card-header"><h2>Customer follow-ups</h2><span class="pill">Automatic</span></div><p class="fu-intro">Ask the customer for missing details with one tap. They answer on a simple form — no texting back and forth.</p><button class="primary full" data-req="prepare">Ask customer for details</button></section>`;
+ const left=open(l),total=f.items.length,done=total-left.length,complete=!left.length;
+ const badge_=complete?['ready','All details received']:f.paused?['waiting','Paused']:f.openedAt&&f.sent?['research','Opened by customer']:f.sent?['waiting','Waiting for customer']:['new','Ready to send'];
+ const short=t=>new Date(t).toLocaleString('en-AU',{day:'numeric',month:'short',hour:'numeric',minute:'2-digit'}).replace(/,? at /,', ');
+ const steps=[['Sent',f.lastSentAt],['Opened',f.openedAt],['Answered',complete?(f.answeredAt||f.history.at(-1)?.at):null]];
+ const next=!complete&&!f.paused&&f.sent&&S.autoRequest&&(f.sent-1)<S.maxReminders?`Next reminder ${short(f.reminderAt)}`:f.paused&&!complete?'Automation paused':'';
+ return `<section class="card followup-card fu"><div class="card-header"><h2>Customer follow-ups</h2><span class="badge ${badge_[0]}">${badge_[1]}</span></div>
+ <ol class="fu-track" aria-label="Request progress">${steps.map(([label,at])=>`<li class="${at?'done':''}"><span class="fu-dot" aria-hidden="true">${at?'✓':''}</span><b>${label}</b><small>${at?esc(short(at)):'—'}</small></li>`).join('')}</ol>
+ <div class="fu-progress"><span>${done} of ${total} details received</span><div class="fu-bar" role="progressbar" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${done}"><i style="width:${total?done/total*100:0}%"></i></div></div>
+ <ul class="fu-list">${f.items.map((q,i)=>`<li class="${q.answer?'done':''}"><span class="fu-num" aria-hidden="true">${q.answer?'✓':i+1}</span><div><p>${esc(q.label)}</p>${q.answer?`<small>${esc(q.answer)}${q.online?' · answered online':''}</small>`:''}</div></li>`).join('')}</ul>
+ ${complete?'<p class="fu-done">✓ All details received. Reminders have stopped.</p>':`<div class="fu-actions"><button class="primary" data-req="preview">${f.sent?'Send reminder':'Preview & send'}</button><button class="fu-link" data-req="reply">Record reply</button><button class="fu-link" data-req="pause">${f.paused?'Resume':'Pause'}</button></div>${next?`<p class="fu-next"><span aria-hidden="true">◷</span> ${esc(next)}</p>`:''}`}
+ <details class="fu-history"><summary>Activity · ${f.history.length}</summary><ul>${f.history.slice(-6).reverse().map(h=>`<li><b>${esc(h.event)}</b><small>${esc(short(h.at))}</small></li>`).join('')}</ul></details></section>`};
 const baseDetail=renderDetail;
 renderDetail=function(){baseDetail();const l=state.leads.find(x=>x.id===currentId);if(!l)return;
  $$('[data-req]').forEach(b=>b.onclick=()=>{const a=b.dataset.req;if(a==='prepare'){prepareFollowupFlow(l,true);previewFollowup(l)}if(a==='preview')previewFollowup(l);if(a==='reply')recordFollowupReply(l);if(a==='pause'){l.followupFlow.paused=!l.followupFlow.paused;l.followupFlow.history.push({event:l.followupFlow.paused?'Automation paused':'Automation resumed',at:Date.now()});save();renderDetail()}});
