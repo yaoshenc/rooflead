@@ -30,7 +30,7 @@ For local mock identity, visit `/signin-with-chatgpt?return_to=/`. This developm
 | Area | Implementation / files |
 | --- | --- |
 | Main UI | HTML string in `lib/page.ts`, served by `app/route.ts` |
-| Browser behavior | Plain JavaScript in `public/app.js`, `roof-tools.js`, `commercial.js`, `documents.js`, `imagery-recovery.js` |
+| Browser behavior | Plain JavaScript in `public/app.js`, `roof-tools.js`, `commercial.js`, `documents.js`, `imagery-recovery.js`, `workspace-tools.js` (backup/restore, safe saving, sign-out) |
 | Geometry and styling | `public/geometry.js`, `public/style.css` |
 | PDF output | Bundled jsPDF in `public/vendor/` |
 | Server | TypeScript 5.9.3, Vinext 1.0.0-beta.5, Vite 8.0.13, Cloudflare Worker in `worker/index.ts` |

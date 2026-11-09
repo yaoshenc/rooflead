@@ -167,6 +167,10 @@ export async function gateIndependent(request: Request, env: IndependentEnv): Pr
     });
   }
 
+  if (url.pathname === "/api/session") {
+    return Response.json({ independent: true, signedIn: true }, { headers: securityHeaders });
+  }
+
   // Never trust identity headers from the client on an independent host.
   const headers = new Headers();
   for (const [k, v] of request.headers) if (!k.toLowerCase().startsWith("oai-")) headers.set(k, v);
