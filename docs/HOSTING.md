@@ -64,3 +64,7 @@ The customer quote link (`/?quote=<token>`) runs card deposits in Stripe-style *
 ## Offline inspection mode
 
 `public/sw.js` caches the app shell, scripts and viewed aerial images/photo thumbnails so the inspection mode opens without signal. Photos taken offline are queued in IndexedDB (`rooflead-offline`) and uploaded when the connection returns. API calls are never cached; `/logout` clears the cache.
+
+## Crews, job sheets and weather
+
+Crews and subcontractors live in the workspace data (Settings → Team). A crew job sheet opens at `/?job=<token>`; like the quote portal it reads the workspace data in the same browser, so sharing it with crew phones for real needs server-side job storage and per-crew sign-in. The weather check calls `/api/weather`, which uses Open-Meteo forecasts (free for non-commercial use; commercial use needs an Open-Meteo API plan). The Bureau of Meteorology's website API (`api.weather.bom.gov.au`) is not licensed for reuse; official BOM data is available through BOM's registered data services.

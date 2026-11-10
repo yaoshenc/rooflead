@@ -94,6 +94,7 @@ async function rewrite(l,n){if(!n)return;if(!navigator.onLine){n.status='pending
 async function rewritePending(){for(const l of state.leads)for(const n of l.inspection?.notes||[])if(n.status==='pending')await rewrite(l,n)}
 function noteToFinding(l,n){const fs=l.findings||[];modal(`<h2>Use for a finding</h2><form id="nf"><label class="field">Finding<select name="f"><option value="__new">New finding</option>${fs.map(f=>`<option value="${esc(f.id)}" ${n.findingId===f.id?'selected':''}>${esc(f.code)} · ${esc([f.location,f.defect].join(' — '))}</option>`).join('')}</select></label><div class="modal-actions"><button type="button" class="secondary" data-close>Cancel</button><button class="primary">Save</button></div></form>`);
  $('#nf').onsubmit=e=>{e.preventDefault();const v=new FormData(e.target).get('f');let f=fs.find(x=>x.id===v);if(!f){f={id:crypto.randomUUID(),code:nextCode(l),location:'',defect:'From inspection notes',severity:'Moderate',recommendation:''};(l.findings ||= []).push(f)}f.recommendation=n.recommendation;n.findingId=f.id;save();$('#modal').close();toast('Recommendation added to '+f.code+'.');drawInsp()}}
+window.rlAddPhoto=addPhoto;
 window.openInspection=id=>{const l=state.leads.find(x=>x.id===id);if(l)openInsp(l)};
 
 // ---- Lead page card ----

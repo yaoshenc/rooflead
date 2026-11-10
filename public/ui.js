@@ -29,7 +29,7 @@ renderRows=function(){baseRows();$$('#lead-rows tr[data-lead]').forEach(tr=>{con
 const root=document.documentElement;
 function measure(){const tb=$('.topbar');root.style.setProperty('--topbar-h',(tb?Math.round(tb.getBoundingClientRect().height):0)+'px');const c=$('#content');if(c)root.style.setProperty('--content-pad',getComputedStyle(c).paddingLeft);const sn=$('.section-nav');root.style.setProperty('--secnav-h',(sn?Math.round(sn.getBoundingClientRect().height):0)+'px')}
 addEventListener('resize',measure);
-const SECTIONS=[['.research-card','Property'],['.takeoff-card','Take-off'],['.photos-card','Photos'],['.insp-card','Inspection'],['.hub','Customer']];
+const SECTIONS=[['.job-card','Job'],['.research-card','Property'],['.takeoff-card','Take-off'],['.photos-card','Photos'],['.insp-card','Inspection'],['.hub','Customer']];
 let secItems=[],spyRaf=0;
 const offset=()=>{const tb=$('.topbar')?.getBoundingClientRect().height||0,sn=$('.section-nav')?.getBoundingClientRect().height||0;return tb+sn+12};
 // When the customer column sits beside the main column it is always on screen,
@@ -59,7 +59,7 @@ renderDetail=function(){baseDetail();secItems=[];const grid=$('.detail-grid');if
 };
 
 // ---- Settings: group cards into tabs ----
-const GROUPS=[['business','Business',/Business & invoice/i],['pricing','Pricing',/estimate rates|Take-off rates|Online acceptance/i],['automation','Automation',/^Automation$|information requests|Quote follow-ups|Invoice reminders/i],['integrations','Integrations',/Facebook|Lead channels/i],['data','Data',/Backup/i]];
+const GROUPS=[['business','Business',/Business & invoice/i],['pricing','Pricing',/estimate rates|Take-off rates|Online acceptance/i],['automation','Automation',/^Automation$|information requests|Quote follow-ups|Invoice reminders/i],['integrations','Integrations',/Facebook|Lead channels/i],['team','Team',/Crews|Weather check/i],['data','Data',/Backup/i]];
 const baseSettings=renderSettings;
 renderSettings=function(){baseSettings();queueMicrotask(tabSettings)};
 function tabSettings(){const grid=$('.settings-grid');if(!grid||grid.classList.contains('tabbed'))return;
@@ -85,7 +85,7 @@ const ACTIONS=()=>[
  {g:'Actions',i:'＋',t:'Add a lead',s:'New enquiry',run:()=>{nav('leads');addLead()}},
  {g:'Actions',i:'▧',t:'Create a quote',s:'From a lead',run:()=>{nav('quotes');setTimeout(()=>$('#new-document')?.click(),50)}},
  {g:'Actions',i:'⤓',t:'Download a backup',s:'Settings · Data',run:()=>{store.set('rooflead-settings-tab','data');nav('settings');setTimeout(()=>$('#backup-download')?.click(),80)}},
- {g:'Go to',i:'▤',t:'Leads',run:()=>nav('leads')},{g:'Go to',i:'◉',t:'Customers',run:()=>nav('customers')},{g:'Go to',i:'▧',t:'Quotes & invoices',run:()=>nav('quotes')},{g:'Go to',i:'☷',t:'Price book',run:()=>nav('pricebook')},{g:'Go to',i:'⚙',t:'Settings',run:()=>nav('settings')},
+ {g:'Go to',i:'▤',t:'Leads',run:()=>nav('leads')},{g:'Go to',i:'◉',t:'Customers',run:()=>nav('customers')},{g:'Go to',i:'▧',t:'Quotes & invoices',run:()=>nav('quotes')},{g:'Go to',i:'▦',t:'Schedule',run:()=>nav('schedule')},{g:'Go to',i:'☷',t:'Price book',run:()=>nav('pricebook')},{g:'Go to',i:'⚙',t:'Settings',run:()=>nav('settings')},
 ];
 function search(q){q=q.trim().toLowerCase();const words=q.split(/\s+/).filter(Boolean);const match=s=>words.every(w=>s.includes(w));
  const leads=state.leads.filter(l=>!q||match(`${l.address} ${l.suburb} ${l.name} ${l.service} ${l.status} ${l.source}`.toLowerCase())).slice(0,q?8:5).map(l=>({g:'Leads',i:'⌂',t:l.address,s:`${l.name} · ${(l.suburb||'').split(',')[0]} · ${l.service}`,b:l.status,run:()=>openLead(l.id)}));
