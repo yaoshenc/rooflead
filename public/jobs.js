@@ -106,7 +106,7 @@ function sendSheet(l){const c=crewOf(l.job.crewId),link=sheetLink(l);const text=
  $('#js-copy').onclick=async()=>{try{await navigator.clipboard.writeText(link);toast('Job sheet link copied.')}catch{}};
  $('#js-send').onclick=()=>{l.job.sentAt=Date.now();addHistory(l.job,`Job sheet sent to ${c?.contact||'crew'} by SMS`);save();$('#modal').close();render();toast('Job sheet sent to '+(c?.contact||'the crew')+'.')}}
 const baseDetail=renderDetail;
-renderDetail=function(){baseDetail();const l=state.leads.find(x=>x.id===currentId);if(!l)return;const anchor=$('.research-card');if(!anchor)return;const box=document.createElement('div');box.innerHTML=jobCard(l);anchor.before(box.firstElementChild);
+renderDetail=function(){baseDetail();const l=state.leads.find(x=>x.id===currentId);if(!l)return;const accepted=l.status==='Accepted'||state.quotes.some(q=>q.leadId===l.id&&q.acceptance);if(!accepted&&!['In progress','Completed'].includes(l.job?.status))return;const col=$('.research-card')?.parentElement;if(!col)return;const box=document.createElement('div');box.innerHTML=jobCard(l);col.append(box.firstElementChild);
  const f=$('#job-form');if(f)f.onsubmit=e=>{e.preventDefault();scheduleJob(l,Object.fromEntries(new FormData(f)));renderDetail();toast('Job scheduled.')};
  $$('[data-job]').forEach(b=>b.onclick=()=>{const a=b.dataset.job;if(a==='send')sendSheet(l);if(a==='open')window.open(sheetLink(l),'_blank','noopener'),save();if(a==='edit')editJob(l);if(a==='reschedule')reschedule(l)})};
 
@@ -141,7 +141,6 @@ function editCrew(c){modal(`<h2>${c?'Edit':'Add'} crew or subcontractor</h2><for
  if(c)$('#ce-del').onclick=()=>{if(state.leads.some(l=>l.job?.crewId===c.id&&l.job.status!=='Completed'))return toast('Reassign this crew’s jobs first.');if(!confirm('Remove '+c.name+'?'))return;state.crews=state.crews.filter(x=>x!==c);save();$('#modal').close();renderSettings()}}
 
 // ---- Navigation ----
-const navBtn=document.createElement('button');navBtn.dataset.nav='schedule';navBtn.innerHTML='<span>▦</span> Schedule';$('nav [data-nav="quotes"]')?.after(navBtn);navBtn.onclick=()=>nav('schedule');
 const baseRender=render;render=function(){if(page==='schedule'){updateCounts();renderSchedule();return}baseRender()};
 const baseNav=nav;nav=function(p){baseNav(p);if(p==='schedule')$('#breadcrumb').textContent='Schedule'};
 

@@ -22,7 +22,7 @@ function nextAction(l,q,st){
  if(!cur){const inv=(state.invoices||[]).find(i=>i.quoteId===q?.id);return inv?{label:'Open invoice',run:()=>openInvoice(inv.id)}:null}
  if(cur.key==='details'){if(left)return {label:f.sent?'View request':'Send request',run:()=>previewFollowup(l)};return {label:'Measure roof',run:()=>im?.available&&typeof openRoofEditor==='function'?openRoofEditor(l):editMeasurements(l)}}
  if(cur.key==='quote')return q?{label:'Prepare quote',run:()=>{if(page!=='quote'||currentId!==q.id)openQuote(q.id);setTimeout(()=>$('#prepare-quote')?.click(),50)}}:{label:'Create quote',run:()=>createQuote(l)};
- if(cur.key==='accepted')return {label:'Share with customer',run:()=>{if(page!=='quote'||currentId!==q.id)openQuote(q.id);setTimeout(()=>typeof shareQuotation==='function'&&shareQuotation(q),50)}};
+ if(cur.key==='accepted')return {label:'Send to customer',run:()=>{if(page!=='quote'||currentId!==q.id)openQuote(q.id);setTimeout(()=>typeof shareQuotation==='function'&&shareQuotation(q),50)}};
  if(cur.key==='invoice')return {label:'Open quote',run:()=>openQuote(q.id)};
  return null;
 }
