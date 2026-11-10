@@ -68,3 +68,7 @@ The customer quote link (`/?quote=<token>`) runs card deposits in Stripe-style *
 ## Crews, job sheets and weather
 
 Crews and subcontractors live in the workspace data (Settings → Team). A crew job sheet opens at `/?job=<token>`; like the quote portal it reads the workspace data in the same browser, so sharing it with crew phones for real needs server-side job storage and per-crew sign-in. The weather check calls `/api/weather`, which uses Open-Meteo forecasts (free for non-commercial use; commercial use needs an Open-Meteo API plan). The Bureau of Meteorology's website API (`api.weather.bom.gov.au`) is not licensed for reuse; official BOM data is available through BOM's registered data services.
+
+## Sending quotations and the Messages page
+
+Quotations go out by email and SMS when they are prepared (Settings → Automation → Sending quotations; turn automatic sending off to review each one first). Each send is recorded on the quotation (`quote.sends`) in the browser workspace data, with the email, SMS text and recipients, and the Messages page lists everything RoofLead has recorded as sent. No email or SMS provider is connected: delivering these messages for real needs a server-side email service (for example Resend, Postmark or SES) and an SMS gateway (for example Twilio), with their API keys stored as Worker secrets. Quotations shared before this feature get a delivery record from their shared date the first time the workspace loads; no migration is needed.

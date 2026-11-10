@@ -1,0 +1,31 @@
+/* Sending quotations by email and SMS, and the Messages page. */
+.qs-to{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:4px 0 12px}
+.qs-ch{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:6px 8px;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:13px;font-weight:600;background:#fff}
+.qs-ch input[type=checkbox]{width:16px;height:16px;margin:0;accent-color:var(--green)}
+.qs-ch input:not([type=checkbox]){grid-column:1/-1;width:100%;min-width:0;font-size:13px;font-weight:400;padding:8px 10px;border:1px solid var(--line);border-radius:8px}
+.qs-ch input:disabled{background:#f7f8fa;color:var(--muted)}
+#qs-prev{margin-top:10px}
+.mail-body .mail-li{margin:0 0 4px;padding-left:16px;position:relative}
+.mail-body .mail-li:before{content:'';position:absolute;left:4px;top:.65em;width:5px;height:5px;border-radius:50%;background:var(--green)}
+.mail-body .mail-kv{display:flex;justify-content:space-between;gap:12px;margin:0 0 6px;padding:8px 12px;background:#f7f8fa;border-radius:8px}
+.mail-body .mail-kv span{color:var(--muted)}
+.mail-attach{display:inline-flex;align-items:center;gap:10px;margin-top:6px;padding:8px 14px 8px 8px;border:1px solid var(--line);border-radius:10px;background:#fff}
+.mail-attach b{display:block;font-size:12px}.mail-attach small{display:block;font-size:11px;color:var(--muted)}
+.pdf-ic{display:grid;place-items:center;width:34px;height:40px;border-radius:5px;background:#d6453d;color:#fff;font-size:10px;font-weight:700;letter-spacing:.02em}
+.qs-sends{list-style:none;margin:0 0 12px;padding:10px 0 0;border-top:1px solid #eef1f5}
+.qs-sends li{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 0}
+.qs-sends b{display:block;font-size:13px}.qs-sends small{display:block;font-size:11px;color:var(--muted);word-break:break-word}
+.qs-card .full{width:100%}
+.msg-list{list-style:none;margin:0;padding:0}
+.msg-list li{display:grid;grid-template-columns:170px 1fr auto;gap:14px;align-items:center;padding:12px 16px;border-top:1px solid #eef1f5;cursor:pointer}
+.msg-list li:hover,.msg-list li:focus-visible{background:#f7f8fa;outline:0}
+.msg-list li.empty{display:block;cursor:default;color:var(--muted);text-align:center;padding:30px}
+.msg-type{justify-self:start;font-size:11px;font-weight:600;padding:4px 8px;border-radius:999px;background:#eef1f5;color:var(--ink);white-space:nowrap}
+.msg-main{min-width:0}.msg-main b{display:block;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.msg-main small{display:block;font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.msg-meta{text-align:right;font-size:12px}.msg-meta small{display:block;color:var(--muted);font-size:11px}
+@media (max-width:700px){
+ .qs-to{grid-template-columns:1fr}
+ .msg-list li{grid-template-columns:1fr auto;gap:6px 10px;padding:12px}
+ .msg-type{grid-column:1/-1}
+}
