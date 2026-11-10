@@ -56,3 +56,11 @@ Migration `0004_info_requests.sql` adds `questions`, `answers`, `answered_at` an
 Migration `0003_job_photos.sql` adds `job_photos` (JPEG bytes + thumbnails, owner-scoped) and `upload_links` (customer upload tokens, stored as SHA-256 hashes). Customer upload pages (`/upload/<token>`) are public by design; they can only add up to 20 photos to one job and expire after 14 days. On the owner-private Sites deployment, customers cannot reach these links.
 
 Migration `0002_facebook_inbound.sql` adds `inbound_leads` and `workspace_settings` (append-only; applied by the deploy script).
+
+## Quote portal payments (demo)
+
+The customer quote link (`/?quote=<token>`) runs card deposits in Stripe-style **test mode**: no payment provider is connected, no money moves, and card numbers are never stored or sent (only brand and last four digits are kept). The portal reads the quote from the same browser's workspace data, so it demonstrates the flow on the roofer's own device; a real customer link needs server-side quote storage and a Stripe PaymentIntent integration (`STRIPE_SECRET_KEY`, webhook for `payment_intent.succeeded`). Reminders and follow-ups are recorded in RoofLead but not delivered until an email/SMS provider is connected.
+
+## Offline inspection mode
+
+`public/sw.js` caches the app shell, scripts and viewed aerial images/photo thumbnails so the inspection mode opens without signal. Photos taken offline are queued in IndexedDB (`rooflead-offline`) and uploaded when the connection returns. API calls are never cached; `/logout` clears the cache.

@@ -29,7 +29,7 @@ renderRows=function(){baseRows();$$('#lead-rows tr[data-lead]').forEach(tr=>{con
 const root=document.documentElement;
 function measure(){const tb=$('.topbar');root.style.setProperty('--topbar-h',(tb?Math.round(tb.getBoundingClientRect().height):0)+'px');const c=$('#content');if(c)root.style.setProperty('--content-pad',getComputedStyle(c).paddingLeft);const sn=$('.section-nav');root.style.setProperty('--secnav-h',(sn?Math.round(sn.getBoundingClientRect().height):0)+'px')}
 addEventListener('resize',measure);
-const SECTIONS=[['.research-card','Property'],['.takeoff-card','Take-off'],['.photos-card','Photos'],['.hub','Customer']];
+const SECTIONS=[['.research-card','Property'],['.takeoff-card','Take-off'],['.photos-card','Photos'],['.insp-card','Inspection'],['.hub','Customer']];
 let secItems=[],spyRaf=0;
 const offset=()=>{const tb=$('.topbar')?.getBoundingClientRect().height||0,sn=$('.section-nav')?.getBoundingClientRect().height||0;return tb+sn+12};
 // When the customer column sits beside the main column it is always on screen,
@@ -59,7 +59,7 @@ renderDetail=function(){baseDetail();secItems=[];const grid=$('.detail-grid');if
 };
 
 // ---- Settings: group cards into tabs ----
-const GROUPS=[['business','Business',/Business & invoice/i],['pricing','Pricing',/estimate rates|Take-off rates/i],['automation','Automation',/^Automation$|information requests/i],['integrations','Integrations',/Facebook|Lead channels/i],['data','Data',/Backup/i]];
+const GROUPS=[['business','Business',/Business & invoice/i],['pricing','Pricing',/estimate rates|Take-off rates|Online acceptance/i],['automation','Automation',/^Automation$|information requests|Quote follow-ups|Invoice reminders/i],['integrations','Integrations',/Facebook|Lead channels/i],['data','Data',/Backup/i]];
 const baseSettings=renderSettings;
 renderSettings=function(){baseSettings();queueMicrotask(tabSettings)};
 function tabSettings(){const grid=$('.settings-grid');if(!grid||grid.classList.contains('tabbed'))return;

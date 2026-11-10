@@ -3,6 +3,7 @@ import { outlineEndpoint } from "../lib/outline";
 import { researchEndpoint } from "../lib/research";
 import { facebookWebhook, inboundEndpoint } from "../lib/facebook";
 import { customerUpload, photosEndpoint } from "../lib/photos";
+import { assistEndpoint } from "../lib/assist";
 import handler from "vinext/server/fetch-handler";
 import { runWithConnectorBinding } from "../lib/connector-context";
 import type { ConnectorBinding } from "../lib/connector-contract.mjs";
@@ -22,6 +23,7 @@ const worker = {
     if (path === "/api/facebook/webhook") return facebookWebhook(request, env as any, ctx);
     // Customer photo uploads are authorised by an unguessable link token.
     if (path.startsWith("/upload/") || path.startsWith("/api/customer-upload/") || path.startsWith("/api/customer-request/")) return customerUpload(request, env as any);
+    if (path === "/api/assist/recommendation") return assistEndpoint(request, env as any);
     if (path === "/api/photos" || path.startsWith("/api/photos/") || path === "/api/upload-links") return photosEndpoint(request, env as any);
     if (path === "/api/inbound" || path === "/api/inbound/ack" || path.startsWith("/api/facebook/")) return inboundEndpoint(request, env as any);
     if (new URL(request.url).pathname==="/api/imagery") return imageryEndpoint(request, env as any);

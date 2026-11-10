@@ -13,7 +13,7 @@ const seed=[
 ];
 let state;try{state=JSON.parse(localStorage.getItem('rooflead-v1'))}catch{}state=state||{leads:seed,quotes:[{id:1006,leadId:6,status:'Draft',area:172,rate:95,labour:34,access:1200,waste:850,margin:15,gst:10},{id:1008,leadId:8,status:'Draft',area:265,rate:52,labour:34,access:1200,waste:850,margin:15,gst:10}],settings:{rate:95,labour:34,access:1200,waste:850,margin:15,gst:10,autoResearch:true,autoRequest:true}};
 let page='leads',filter='All leads',search='',currentId=null,researchBusy=false;
-function save(){localStorage.setItem('rooflead-v1',JSON.stringify(state));updateCounts()}
+function save(){if(window.rlStale)return updateCounts();localStorage.setItem('rooflead-v1',JSON.stringify(state));updateCounts()}
 function updateCounts(){$('#lead-count').textContent=state.leads.length;$('#quote-count').textContent=state.quotes.length}
 function toast(t){$('#toast').textContent=t;$('#toast').classList.add('show');setTimeout(()=>$('#toast').classList.remove('show'),3500)}
 function badge(status){return `<span class="badge ${({'Ready to quote':'ready','Awaiting customer':'waiting','Researching':'research','New lead':'new','Quoted':'quoted','Draft':'waiting','Reviewed':'ready'})[status]||'new'}">${status==='Ready to quote'?'✓':status==='Researching'?'✧':status==='Awaiting customer'?'◷':'•'} ${esc(status)}</span>`}
