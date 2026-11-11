@@ -21,3 +21,5 @@
 @media (prefers-reduced-motion:reduce){.cc-chev,.cc-sub>summary:before{transition:none}}
 /* Leads page: keep the list front and centre. */
 .automation-banner,.bottom-note{display:none!important}
+/* Customer column: pinned while it fits, otherwise sticks by its bottom edge (organise.js sets --side-top). */
+@media(min-width:1101px){.detail-grid>div.side-col:last-child{top:var(--side-top,calc(var(--topbar-h,76px) + var(--secnav-h,56px) + 12px))}}

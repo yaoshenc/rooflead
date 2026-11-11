@@ -45,7 +45,16 @@ function organiseQuote(){const side=$('.commercial-layout')?.children[1];if(!sid
 // Section shortcuts on the lead page open a folded card before scrolling to it.
 document.addEventListener('click',e=>{const b=e.target.closest('.section-nav [data-sec]');if(!b)return;const sel={Property:'.research-card','Take-off':'.takeoff-card',Photos:'.photos-card',Inspection:'.insp-card',Job:'.job-card'}[b.textContent.trim()];const card=sel&&$(sel);if(card?.ccOpen&&card.classList.contains('cc-closed')){card.ccOpen();remember(card.dataset.cc,true)}},true);
 
-const baseDetail=renderDetail;renderDetail=function(){baseDetail();try{organiseLead()}catch(e){console.warn('organise lead',e)}};
+// Customer column on wide screens: pinned below the section bar while it fits
+// the window; when it is taller (e.g. a long Details tab) it scrolls with the
+// page and holds once its bottom is in view, so every part stays reachable.
+let sideCol=null;
+function fitSide(){const col=sideCol;if(!col?.isConnected)return;const css=getComputedStyle(document.documentElement);const pin=(parseFloat(css.getPropertyValue('--topbar-h'))||76)+(parseFloat(css.getPropertyValue('--secnav-h'))||0)+12;
+ const room=innerHeight-pin-12,h=col.offsetHeight;col.style.setProperty('--side-top',(h<=room?pin:Math.round(innerHeight-h-12))+'px')}
+const sideObs=typeof ResizeObserver==='function'?new ResizeObserver(()=>fitSide()):null;
+addEventListener('resize',fitSide);
+function watchSide(){const col=$('.detail-grid')?.children[1];if(!col||col===sideCol){fitSide();requestAnimationFrame(fitSide);return}sideObs?.disconnect();sideCol=col;col.classList.add('side-col');sideObs?.observe(col);fitSide();requestAnimationFrame(fitSide);setTimeout(fitSide,300)}
+const baseDetail=renderDetail;renderDetail=function(){baseDetail();try{organiseLead()}catch(e){console.warn('organise lead',e)}try{watchSide()}catch(e){console.warn('organise side',e)}};
 const baseQuote=renderQuote;renderQuote=function(){baseQuote();try{organiseQuote()}catch(e){console.warn('organise quote',e)}};
 if(page==='detail'||page==='quote')render();
 })();
