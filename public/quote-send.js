@@ -34,15 +34,13 @@ function sendNow(q,{auto=false,useEmail=true,useSms=true,email,phone,subject,tex
 window.sendQuotation=sendNow;
 
 // Prepare → send automatically (when enabled) or open the send window.
-let autoFor=null;
-const basePrepare=prepareQuotation;
-prepareQuotation=async function(q,l){autoFor=!q.quoteDocument&&S.qsAuto?q.id:null;return basePrepare(q,l)};
-shareQuotation=function(q){if(!q.quoteDocument)return;if(autoFor===q.id){autoFor=null;const c=compose(q);if(c.email||c.phone){sendNow(q,{auto:true});renderQuote();openSend(q,{justSent:true});return}}openSend(q,{})};
+// Preparing or sharing a quotation always opens the send window to confirm first.
+shareQuotation=function(q){if(!q.quoteDocument)return;openSend(q,{})};
 async function openSend(q,{justSent}){const c=compose(q),last=q.sends?.at(-1),size=await pdfSize(q);let ch='email';
- modal(`<span class="eyebrow">${justSent?'SENT AUTOMATICALLY':'SEND QUOTATION'}</span><h2>${justSent?`Sent to ${esc(first(q.quoteDocument.customer.name))}`:'Send to your customer'}</h2><p>${justSent?`${esc(q.quoteDocument.number)} went out by ${esc(last.channels.join(' and '))} ${esc(when(last.at))}. Follow-ups are scheduled automatically.`:`${esc(q.quoteDocument.number)} · ${money(q.quoteDocument.total)} incl. GST`}</p>
+ modal(`<span class="eyebrow">${justSent?'SENT':'SEND QUOTATION'}</span><h2>${justSent?`Sent to ${esc(first(q.quoteDocument.customer.name))}`:'Send to your customer'}</h2><p>${justSent?`${esc(q.quoteDocument.number)} went out by ${esc(last.channels.join(' and '))} ${esc(when(last.at))}. Follow-ups are scheduled automatically.`:`${esc(q.quoteDocument.number)} · ${money(q.quoteDocument.total)} incl. GST`}</p>
  <form id="qs-form"><div class="qs-to"><label class="qs-ch"><input type="checkbox" name="useEmail" ${c.email?'checked':''} ${justSent?'disabled':''}> Email<input name="email" type="email" value="${esc(c.email)}" placeholder="Customer email" ${justSent?'disabled':''}></label><label class="qs-ch"><input type="checkbox" name="useSms" ${c.phone?'checked':''} ${justSent?'disabled':''}> SMS<input name="phone" type="tel" value="${esc(c.phone)}" placeholder="Customer mobile" ${justSent?'disabled':''}></label></div>
  <div class="request-channel-tabs"><button type="button" data-qsch="email" class="active">Email</button><button type="button" data-qsch="sms">SMS</button></div><div id="qs-prev"></div>
- <div class="modal-actions"><button type="button" class="secondary" id="qs-pdf">Download PDF</button><button type="button" class="secondary" id="qs-open">Open customer view ↗</button>${justSent?'<button type="button" class="primary" data-close>Done</button>':`<button class="primary">${q.sends?.length?'Send again':'Send quotation'}</button>`}</div></form>`);
+ <div class="modal-actions"><button type="button" class="secondary" id="qs-pdf">Download PDF</button><button type="button" class="secondary" id="qs-open">Open customer view ↗</button>${justSent?'<button type="button" class="secondary" id="qs-again">Send again</button><button type="button" class="primary" data-close>Done</button>':`<button class="primary">${q.sends?.length?'Send again':'Send quotation'}</button>`}</div></form>`);
  const f=$('#qs-form');const wide=matchMedia('(min-width:900px)');
  const mailView=to=>`<div class="mail"><div class="mail-head"><div><span>From</span><b>${esc(state.business?.name||'')}${state.business?.email?' &lt;'+esc(state.business.email)+'&gt;':''}</b></div><div><span>To</span><b>${esc(to||'No email')}</b></div><div><span>Subject</span><b>${esc(c.subject)}</b></div></div><div class="mail-body">${emailHtml(c.text,q,size)}</div></div>`;
  const smsView=to=>`<div class="phone"><div class="phone-top"><b>${esc(state.business?.name||'')}</b><span>To ${esc(to||'no mobile')}</span></div><div class="phone-bubble">${esc(c.sms).replace(/(https?:\/\/\S+)/g,'<u>$1</u>')}</div><small>${[...c.sms].length} characters · ${[...c.sms].length<=160?1:Math.ceil([...c.sms].length/153)} SMS</small></div>`;
@@ -51,9 +49,10 @@ async function openSend(q,{justSent}){const c=compose(q),last=q.sends?.at(-1),si
   $('#qs-prev').innerHTML=both?`<div class="qs-both"><section><h3>Email</h3>${mailView(f.email.value)}</section><section><h3>SMS</h3>${smsView(f.phone.value)}</section></div>`:ch==='email'?mailView(f.email.value):smsView(f.phone.value)};
  draw();wide.addEventListener('change',draw);$$('[data-qsch]').forEach(b=>b.onclick=()=>{ch=b.dataset.qsch;draw()});f.email.oninput=draw;f.phone.oninput=draw;
  $('#qs-pdf').onclick=()=>Commercial.pdf(q.quoteDocument).save(q.quoteDocument.number+'.pdf');
+ if($('#qs-again'))$('#qs-again').onclick=()=>openSend(q,{});
  $('#qs-open').onclick=()=>{$('#modal').close();window.open(window.quoteLink?quoteLink(q):'#','_blank','noopener')};
  f.onsubmit=e=>{e.preventDefault();if(justSent)return;const v=Object.fromEntries(new FormData(f));const ok=sendNow(q,{useEmail:!!v.useEmail,useSms:!!v.useSms,email:v.email.trim(),phone:v.phone.trim()});
-  if(!ok)return toast('Add an email or mobile number to send the quotation.');const l=leadOf(q);if(v.email.trim()&&!l.email)l.email=v.email.trim();if(v.phone.trim()&&!l.phone)l.phone=v.phone.trim();save();$('#modal').close();renderQuote();toast(`Quotation sent to ${first(q.quoteDocument.customer.name)}.`)}}
+  if(!ok)return toast('Add an email or mobile number to send the quotation.');const l=leadOf(q);if(v.email.trim()&&!l.email)l.email=v.email.trim();if(v.phone.trim()&&!l.phone)l.phone=v.phone.trim();save();renderQuote();openSend(q,{justSent:true})}}
 
 // ---- Quote page: delivery card ----
 function viewMsg(m,title){modal(`<span class="eyebrow">${esc(title)}</span><h2>Sent ${esc(when(m.at))}</h2><p>By ${esc((m.channels||[]).join(' and ')||m.channels||'')}${m.auto?' · automatically':''}${m.to?' · to '+esc([].concat(m.to).join(', ')):''}</p>${m.email?`<div class="mail">${m.subject?`<div class="mail-head"><div><span>Subject</span><b>${esc(m.subject)}</b></div></div>`:''}<div class="mail-body">${m.email.split('\n').map(x=>/^https?:/.test(x.trim())?`<p><a class="mail-button" href="${esc(x.trim())}" target="_blank" rel="noopener">Open link →</a></p>`:x.trim()?`<p>${esc(x)}</p>`:'').join('')}</div></div>`:''}${m.sms?`<div class="phone" style="margin-top:12px"><div class="phone-bubble">${esc(m.sms)}</div></div>`:''}${m.text&&!m.email&&!m.sms?`<div class="phone"><div class="phone-bubble">${esc(m.text)}</div></div>`:''}<div class="modal-actions"><button class="primary" data-close>Close</button></div>`)}
@@ -72,10 +71,10 @@ renderQuote=function(){baseQuote();const q=state.quotes.find(x=>x.id===currentId
 // ---- Settings ----
 const baseSettings=renderSettings;
 renderSettings=function(){baseSettings();const grid=$('.settings-grid');if(!grid)return;const card=document.createElement('form');card.className='card';
- card.innerHTML=`<h2>Sending quotations</h2><p>How quotations reach your customers by email and SMS.</p><div class="connection"><div><b>Send automatically when prepared</b><p>Turn off to review each email and SMS before it goes.</p></div><button type="button" class="toggle ${S.qsAuto?'on':''}" id="qs-toggle" role="switch" aria-checked="${S.qsAuto}" aria-label="Send quotations automatically"></button></div>
+ card.innerHTML=`<h2>Sending quotations</h2><p>The email and SMS your customers receive with a quotation. You review and confirm each one before it is sent.</p>
  <label class="field">Email subject<input name="qsSubject" maxlength="160" value="${esc(S.qsSubject)}"></label><label class="field">Email message<textarea name="qsEmail" rows="9">${esc(S.qsEmail)}</textarea></label><label class="field">SMS message<textarea name="qsSms" rows="2">${esc(S.qsSms)}</textarea></label>
  <p class="fb-meta">Placeholders: {first_name} {address} {number} {summary} {total} {deposit} {valid_until} {link} {business} {phone}. The quotation PDF is attached to the email.</p><div class="inline-buttons"><button class="primary">Save</button><button type="button" class="secondary" id="qs-default">Restore defaults</button></div>`;
- grid.append(card);$('#qs-toggle').onclick=e=>{S.qsAuto=!S.qsAuto;e.currentTarget.classList.toggle('on',S.qsAuto);e.currentTarget.setAttribute('aria-checked',S.qsAuto);save()};
+ grid.append(card);
  $('#qs-default').onclick=()=>{for(const k of ['qsSubject','qsEmail','qsSms'])S[k]=DEFAULTS[k];save();renderSettings()};
  card.onsubmit=e=>{e.preventDefault();const d=Object.fromEntries(new FormData(card));for(const k of Object.keys(d))S[k]=String(d[k]).trim()||DEFAULTS[k];save();toast('Quotation messages saved.')}};
 

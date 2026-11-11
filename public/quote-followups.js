@@ -34,7 +34,7 @@ window.quoteNextFollowup=nextFor;
 
 // ---- Quote page card ----
 function card(q){if(!q.quoteDocument)return '';const f=q.followups||{sent:[]};const base=baseAt(q),acc=q.acceptance;
- const rows=[[`Sent to customer`,base],[`Viewed online`,Date.parse(q.viewedAt||0)||null],...dayList().map(n=>{const s=f.sent.find(x=>x.day===n);return [`Day ${n} follow-up`,s?Date.parse(s.at):null,!s&&!acc&&!f.paused?base+n*DAY:null,n]}),['Accepted',acc?Date.parse(acc.acceptedAt):null]];
+ const rows=[[`Sent to customer`,base],[`Viewed online`,q.viewedAt?Date.parse(q.viewedAt)||null:null],...dayList().map(n=>{const s=f.sent.find(x=>x.day===n);return [`Day ${n} follow-up`,s?Date.parse(s.at):null,!s&&!acc&&!f.paused?base+n*DAY:null,n]}),['Accepted',acc?Date.parse(acc.acceptedAt):null]];
  return `<section class="card qf-card"><div class="card-header"><h2>Quote follow-ups</h2><span class="badge ${acc?'ready':f.paused?'waiting':'research'}">${acc?'Stopped · accepted':f.paused?'Paused':S.qfEnabled?'Automatic':'Off'}</span></div>
  <ol class="qf-list">${rows.map(([label,at,due,n])=>`<li class="${at?'done':''}"><span class="qf-dot">${at?'✓':''}</span><div><b>${label}</b><small>${at?esc(short(at)):due?'Scheduled '+esc(short(due)):'—'}</small></div>${n&&!at&&!acc?`<button class="fu-link" data-qf-send="${n}">Send now</button>`:''}${n&&at?`<button class="fu-link" data-qf-view="${n}">View</button>`:''}</li>`).join('')}</ol>
  ${acc?'':`<div class="inline-buttons"><button class="fu-link" data-qf="pause">${f.paused?'Resume follow-ups':'Pause follow-ups'}</button></div>`}</section>`}
