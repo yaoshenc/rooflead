@@ -52,6 +52,10 @@ Leads, quotes, settings, the price book, quote templates, photo labels and inspe
 
 For a shared business workspace, a future change should move leads/quotes/settings into authenticated server storage with team membership, permissions, migrations and backups. This export does not make that architectural change.
 
+## How AI tools were used
+
+See [PROMPTS.md](PROMPTS.md) for the prompt log: the AI tools used, every prompt given, what came out of it and the decisions made.
+
 ## Share and improve
 
 Read [GitHub setup](docs/GITHUB.md), [contribution instructions](CONTRIBUTING.md) and [AI assistant instructions](AGENTS.md). Existing detailed framework/runtime notes are retained in [STARTER.md](docs/STARTER.md).
