@@ -17,7 +17,7 @@ function merge(i){
  l.fb={source:i.source,externalId:i.externalId,simulated:!!i.simulated,messages:i.messages||[],answers:i.answers||[],adName:i.adName||'',autoReplyAt:i.autoReplyAt||0,updatedAt:i.updatedAt};
  return {l,isNew};
 }
-async function poll(force){
+async function poll(force){if(document.body.classList.contains('portal-mode'))return;
  if(polling||(!force&&Date.now()-lastPoll<20000))return;polling=true;lastPoll=Date.now();
  try{const r=await fetch('/api/inbound',{cache:'no-store'});if(!r.ok)return;const d=await r.json();if(!d.items?.length)return;
   let added=0,updated=0;const fresh=[];

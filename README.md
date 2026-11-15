@@ -30,12 +30,14 @@ For local mock identity, visit `/signin-with-chatgpt?return_to=/`. This developm
 | Area | Implementation / files |
 | --- | --- |
 | Main UI | HTML string in `lib/page.ts`, served by `app/route.ts` |
-| Browser behavior | Plain JavaScript in `public/app.js`, `roof-tools.js`, `commercial.js`, `documents.js`, `imagery-recovery.js`, `workspace-tools.js` (backup/restore, safe saving, sign-out), `roof-estimate.js` (aerial take-off), `facebook-leads.js` (Facebook/Messenger leads), `price-book.js` (price book + quote templates), `photos.js`/`photo-prep.js`/`customer-upload.js` (job photos, defect findings, customer uploads), `info-requests.js` (customer information requests: email/SMS, online answers, reminders), `example-jobs.js` (example workspace), `journey.js` (job progress bar), `customer-hub.js` (customer panel: conversation, details requested, quote readiness), `customers.js` (customer directory and profiles), `ui.js` + `ui.css` (UI refresh: search palette, shortcuts, mobile navigation, tabbed settings) |
+| Browser behavior | Plain JavaScript in `public/app.js`, `roof-tools.js`, `commercial.js`, `documents.js`, `imagery-recovery.js`, `workspace-tools.js` (backup/restore, safe saving, sign-out), `roof-estimate.js` (aerial take-off), `facebook-leads.js` (Facebook/Messenger leads), `price-book.js` (price book + quote templates), `photos.js`/`photo-prep.js`/`customer-upload.js` (job photos, defect findings, customer uploads), `info-requests.js` (customer information requests: email/SMS, online answers, reminders), `example-jobs.js` (example workspace), `journey.js` (job progress bar), `customer-hub.js` (customer panel: conversation, details requested, quote readiness), `customers.js` (customer directory and profiles), `quote-portal.js` (customer quote link: accept, sign, card deposit in Stripe-style test mode), `quote-followups.js` (day 3/7 quote nudges), `invoice-tracking.js` (payments, overdue reminders), `inspection.js` + `sw.js` (offline on-site inspection mode), `jobs.js` (crews, scheduling, crew job sheets, weather check), `quote-send.js` + `quote-send.css` (sending quotations by email and SMS after the roofer confirms, and the Messages page), `accent.css` (the amber accent colour), `organise.js` + `organise.css` (collapsible cards on the lead and quotation pages, one "Sending & follow-ups" card per quotation), `ui.js` + `ui.css` (UI refresh: search palette, shortcuts, mobile navigation, tabbed settings) |
 | Geometry and styling | `public/geometry.js`, `public/style.css` |
 | PDF output | Bundled jsPDF in `public/vendor/` |
 | Server | TypeScript 5.9.3, Vinext 1.0.0-beta.5, Vite 8.0.13, Cloudflare Worker in `worker/index.ts` |
 | Framework dependencies | React 19.2.6, Next.js 16.3.4, Tailwind CSS 4.2.1; starter components in `components/ui/` |
 | Photos | `lib/photos.ts` (D1 `job_photos`, customer `upload_links`) |
+| Weather | `lib/weather.ts` daily forecast per job site via Open-Meteo (CC BY 4.0), cached 30 min |
+| Inspection notes | `lib/assist.ts` rewrites dictated site notes into recommendations (OpenAI, same model as research) |
 | Facebook leads | `lib/facebook.ts` webhook + inbound API; setup in [docs/FACEBOOK.md](docs/FACEBOOK.md) |
 | Research / outlines | `lib/research.ts`, `lib/outline.ts`; OpenAI Responses API, currently configured in source as `gpt-5.4-mini` |
 | Address / aerial imagery | `lib/imagery.ts`; NSW Spatial Services |
@@ -49,6 +51,10 @@ Versions above describe this export, not recommendations to upgrade. `package-lo
 Leads, quotes, settings, the price book, quote templates, photo labels and inspection findings are saved in the current browser under localStorage key `rooflead-v1`; photo image files are stored in D1. A different browser or host gets a separate set of data. Research jobs and roof outlines are stored server-side in D1 tables `research_jobs` and `roof_outlines`; Facebook/Messenger leads wait in `inbound_leads` until a browser imports them, and the auto-reply template is in `workspace_settings`. GitHub shares source code; it does not synchronize either kind of runtime data.
 
 For a shared business workspace, a future change should move leads/quotes/settings into authenticated server storage with team membership, permissions, migrations and backups. This export does not make that architectural change.
+
+## How AI tools were used
+
+See [PROMPTS.md](PROMPTS.md) for the prompt log: the AI tools used, every prompt given, what came out of it and the decisions made.
 
 ## Share and improve
 

@@ -1,0 +1,25 @@
+/* Collapsible cards and grouped sections (organise.js). */
+.card-header.cc-head{cursor:pointer;user-select:none;justify-content:flex-start;gap:10px;margin:-6px -8px 12px;padding:6px 8px;border-radius:8px}
+.card-header.cc-head:hover{background:#f7f8fa}
+.card-header.cc-head:focus-visible{outline:2px solid var(--green);outline-offset:1px}
+.cc-head h2{margin:0 auto 0 0}
+.cc-chev{flex:none;width:8px;height:8px;margin:0 4px 0 2px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg) translate(-2px,-2px);transition:transform .15s}
+.card.cc-closed .cc-chev{transform:rotate(-45deg)}
+.card.cc-closed>:not(.cc-head){display:none!important}
+.card.cc-closed>.cc-head{margin-bottom:-6px}
+.cc-sub{margin:12px 0 0;border-top:1px solid #eef1f5;padding-top:10px}
+.cc-sub>summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--muted);padding:2px 0}
+.cc-sub>summary::-webkit-details-marker{display:none}
+.cc-sub>summary:before{content:'';width:6px;height:6px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(-45deg);transition:transform .15s}
+.cc-sub[open]>summary:before{transform:rotate(45deg)}
+.cc-sub>summary:hover{color:var(--ink)}
+.cc-sub-body{padding-top:10px}
+.aerial-panel>.cc-sub{margin:0;padding:10px 14px}
+.cc-sub-body>*:first-child{margin-top:0}
+.qs-card .inline-buttons{margin-top:12px}
+.qs-card .inline-buttons>*{flex:1}
+@media (prefers-reduced-motion:reduce){.cc-chev,.cc-sub>summary:before{transition:none}}
+/* Leads page: keep the list front and centre. */
+.automation-banner,.bottom-note{display:none!important}
+/* Customer column: pinned while it fits, otherwise sticks by its bottom edge (organise.js sets --side-top). */
+@media(min-width:1101px){.detail-grid>div.side-col:last-child{top:var(--side-top,calc(var(--topbar-h,76px) + var(--secnav-h,56px) + 12px))}}

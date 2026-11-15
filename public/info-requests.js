@@ -63,7 +63,7 @@ async function syncAnswers(l,{quiet=false}={}){const f=l.followupFlow;if(!f||!l.
  }catch{}finally{syncing.delete(l.id)}}
 
 // Automation tick: send requests for new leads, send due reminders, collect answers.
-async function tick(){for(const l of state.leads){const f=l.followupFlow;if(!f)continue;
+async function tick(){if(document.body.classList.contains('portal-mode'))return;for(const l of state.leads){const f=l.followupFlow;if(!f)continue;
   if(f.sent)await syncAnswers(l,{quiet:false});
   if(f.paused||!open(l).length||!S.autoRequest)continue;
   if(!f.sent)await send(l,{auto:true});

@@ -56,3 +56,23 @@ Migration `0004_info_requests.sql` adds `questions`, `answers`, `answered_at` an
 Migration `0003_job_photos.sql` adds `job_photos` (JPEG bytes + thumbnails, owner-scoped) and `upload_links` (customer upload tokens, stored as SHA-256 hashes). Customer upload pages (`/upload/<token>`) are public by design; they can only add up to 20 photos to one job and expire after 14 days. On the owner-private Sites deployment, customers cannot reach these links.
 
 Migration `0002_facebook_inbound.sql` adds `inbound_leads` and `workspace_settings` (append-only; applied by the deploy script).
+
+## Quote portal payments (demo)
+
+The customer quote link (`/?quote=<token>`) runs card deposits in Stripe-style **test mode**: no payment provider is connected, no money moves, and card numbers are never stored or sent (only brand and last four digits are kept). The portal reads the quote from the same browser's workspace data, so it demonstrates the flow on the roofer's own device; a real customer link needs server-side quote storage and a Stripe PaymentIntent integration (`STRIPE_SECRET_KEY`, webhook for `payment_intent.succeeded`). Reminders and follow-ups are recorded in RoofLead but not delivered until an email/SMS provider is connected.
+
+## Offline inspection mode
+
+`public/sw.js` caches the app shell, scripts and viewed aerial images/photo thumbnails so the inspection mode opens without signal. Photos taken offline are queued in IndexedDB (`rooflead-offline`) and uploaded when the connection returns. API calls are never cached; `/logout` clears the cache.
+
+## Crews, job sheets and weather
+
+Crews and subcontractors live in the workspace data (Settings → Team). A crew job sheet opens at `/?job=<token>`; like the quote portal it reads the workspace data in the same browser, so sharing it with crew phones for real needs server-side job storage and per-crew sign-in. The weather check calls `/api/weather`, which uses Open-Meteo forecasts (free for non-commercial use; commercial use needs an Open-Meteo API plan). The Bureau of Meteorology's website API (`api.weather.bom.gov.au`) is not licensed for reuse; official BOM data is available through BOM's registered data services.
+
+## Sending quotations and the Messages page
+
+Preparing a quotation opens a send window showing the email and SMS; nothing is sent until the roofer confirms, and the same window offers Send again afterwards (templates: Settings → Automation → Sending quotations). The two property review ticks were removed and no longer block preparing a quotation; the stored `verified`/`siteChecked` lead fields are left in place but unused by the quote flow. Each send is recorded on the quotation (`quote.sends`) in the browser workspace data, with the email, SMS text and recipients, and the Messages page lists everything RoofLead has recorded as sent. No email or SMS provider is connected: delivering these messages for real needs a server-side email service (for example Resend, Postmark or SES) and an SMS gateway (for example Twilio), with their API keys stored as Worker secrets. Quotations shared before this feature get a delivery record from their shared date the first time the workspace loads; no migration is needed.
+
+## Page organisation
+
+`organise.js` loads last and rearranges the lead and quotation pages after they render: secondary cards (photos, inspection, research activity, property brief, document activity) fold behind collapsible headers, and the customer link, delivery history and follow-ups share one "Sending & follow-ups" card. Which cards are open is remembered per browser in localStorage key `rooflead-ui-collapsed`; it is a display preference only and is not part of the workspace data. The Schedule page is no longer in the main navigation, and the Job & crew card appears on a lead only once its quotation is accepted (or work has started). Scheduling, crew job sheets and the weather check still work for accepted jobs.

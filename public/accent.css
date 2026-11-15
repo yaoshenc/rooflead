@@ -1,0 +1,35 @@
+/* One warm accent next to the navy: a hi-vis amber, used for small highlights
+   and the main "next step" action only. Text stays navy for contrast. */
+:root{--sun:#f4b740;--sun-hover:#e9a826;--sun-soft:#fdf1d6;--sun-line:#f7cf7a}
+
+/* Brand mark */
+.brand-dot{color:var(--sun)}
+.brand-icon{box-shadow:inset 0 -3px 0 var(--sun)}
+
+/* Sidebar: active page marker */
+.sidebar nav button{position:relative}
+.sidebar nav button.active:before{content:'';position:absolute;left:-8px;top:9px;bottom:9px;width:3px;border-radius:0 3px 3px 0;background:var(--sun)}
+.live-dot{background:var(--sun)!important;box-shadow:0 0 0 3px var(--sun-soft)!important}
+
+/* Job progress: where the job is now */
+.journey-step.current .journey-dot{border-color:var(--sun);color:var(--ink);background:var(--sun-soft);box-shadow:0 0 0 4px var(--sun-soft)}
+
+/* The main next-step actions on leads and quotations */
+.journey-next,#prepare-quote{background:var(--sun)!important;border-color:var(--sun)!important;color:var(--ink)!important;font-weight:700}
+.journey-next:hover,#prepare-quote:hover{background:var(--sun-hover)!important;border-color:var(--sun-hover)!important}
+.journey-next:focus-visible,#prepare-quote:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+
+/* Active tabs and filters get an amber underline */
+.filter.active:after{background:var(--sun)!important;height:3px!important;border-radius:3px 3px 0 0}
+.hub-tabs button.active{border-bottom-color:var(--sun)!important}
+.request-channel-tabs button.active{border-color:var(--sun)!important;color:var(--ink)!important}
+
+/* Section shortcuts on a lead */
+.section-nav button.active{box-shadow:inset 0 -3px 0 var(--sun)}
+
+/* Stat cards: a thin amber line on the cards that need action */
+.stat{position:relative;overflow:hidden}
+.stat:nth-child(2):before,.stat:nth-child(3):before{content:'';position:absolute;left:0;right:0;top:0;height:3px;background:var(--sun)}
+
+/* Collapsible card headers: amber chevron on hover */
+.cc-head:hover .cc-chev{border-color:var(--sun-hover)}
